@@ -10,20 +10,18 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <!-- html2pdf for professional PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f5f7fb; color: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1e293b; }
         
-        /* Login Overlay */
         .login-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #0f172a, #1e293b);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -33,15 +31,12 @@
             background: white;
             padding: 48px;
             border-radius: 32px;
-            width: 440px;
+            width: 420px;
             max-width: 90%;
             text-align: center;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
         }
-        .login-card h2 { margin-bottom: 12px; color: #0f172a; font-size: 28px; }
-        .login-card input { margin-bottom: 16px; padding: 14px; border-radius: 16px; }
         
-        /* App Layout */
         .app { display: flex; min-height: 100vh; }
         .sidebar {
             width: 280px;
@@ -81,7 +76,6 @@
         }
         .page-title { font-size: 26px; font-weight: 700; background: linear-gradient(135deg, #1e293b, #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
         
-        /* Stats Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -96,21 +90,17 @@
             transition: transform 0.2s;
         }
         .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px -12px rgba(0,0,0,0.15); }
-        .stat-card i { font-size: 32px; margin-bottom: 12px; display: inline-block; }
+        .stat-card i { font-size: 32px; margin-bottom: 12px; }
         .stat-card h3 { font-size: 14px; color: #64748b; margin-bottom: 8px; }
         .stat-card p { font-size: 32px; font-weight: 800; }
         
-        /* Cards */
         .card {
             background: white;
             border-radius: 24px;
             padding: 28px;
             margin-bottom: 28px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: box-shadow 0.2s;
         }
-        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -127,11 +117,7 @@
             font-size: 14px;
             transition: all 0.2s;
         }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-        }
+        input:focus, select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
         button {
             background: #3b82f6;
             color: white;
@@ -147,12 +133,11 @@
         button.danger { background: #ef4444; }
         button.danger:hover { background: #dc2626; }
         button.success { background: #10b981; }
-        button.success:hover { background: #059669; }
         button.secondary { background: #64748b; }
         
         table { width: 100%; border-collapse: collapse; }
         th, td { text-align: left; padding: 14px 12px; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f8fafc; font-weight: 600; color: #1e293b; border-radius: 12px; }
+        th { background: #f8fafc; font-weight: 600; }
         
         .badge {
             padding: 4px 12px;
@@ -165,8 +150,7 @@
         .badge-completed { background: #d1fae5; color: #065f46; }
         .badge-cancelled { background: #fee2e2; color: #991b1b; }
         .badge-delivered { background: #dbeafe; color: #1e40af; }
-        .badge-paid { background: #d1fae5; color: #065f46; }
-        .badge-due { background: #fee2e2; color: #991b1b; }
+        .badge-processing { background: #fed7aa; color: #9a3412; }
         
         .footer-brand { text-align: center; margin-top: 40px; padding: 20px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
         
@@ -198,24 +182,6 @@
             overflow-y: auto;
         }
         
-        .search-section {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-        }
-        .filter-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-        .filter-chip {
-            background: #e2e8f0;
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .filter-chip:hover { background: #cbd5e1; }
-        .filter-chip.active { background: #3b82f6; color: white; }
-        
         .product-card, .warranty-card, .service-card {
             border: 1px solid #e2e8f0;
             border-radius: 18px;
@@ -230,6 +196,24 @@
             transform: translateX(4px);
         }
         
+        .accessory-item {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin: 4px;
+        }
+        
+        .serial-badge {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        
         .ui-autocomplete {
             max-height: 250px;
             overflow-y: auto;
@@ -241,19 +225,6 @@
         }
         .ui-menu-item { padding: 10px 18px; cursor: pointer; }
         .ui-menu-item:hover { background: #e0f2fe; }
-        
-        /* Invoice styling */
-        .invoice-print {
-            padding: 30px;
-            font-family: 'Inter', sans-serif;
-        }
-        .invoice-header { text-align: center; margin-bottom: 30px; }
-        .invoice-logo { max-width: 80px; margin-bottom: 10px; }
-        .invoice-title { font-size: 28px; font-weight: 800; margin-bottom: 5px; }
-        .invoice-details { margin: 20px 0; }
-        .invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        .invoice-table th, .invoice-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .signature-area { margin-top: 40px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -321,16 +292,14 @@
                     <div><label>Initial Stock</label><input id="prodStock" type="number" value="0"></div>
                     <div><label>Warranty (months)</label><input id="prodWarranty" type="number" value="12"></div>
                 </div>
-                <div id="serialArea" style="display:none;"><label>Serial Numbers (one per line)</label><textarea id="prodSerials" rows="2"></textarea></div>
-                <button id="addProductBtn" class="success">Add Product</button>
+                <div id="serialArea" style="display:none;"><label>Individual Serial Numbers (one per line)</label><textarea id="prodSerials" rows="2" placeholder="SERIAL-001&#10;SERIAL-002"></textarea></div>
+                <button id="addProductBtn" class="success">Add Product & Generate Serial</button>
             </div>
             
             <div class="card">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-search"></i> Product List</h3>
-                <div class="search-section">
-                    <input type="text" id="productSearch" placeholder="Search by name, category, brand, model..." style="width:100%;">
-                    <div class="filter-group" id="categoryFilters"></div>
-                    <div class="filter-group" id="brandFilters"></div>
+                <div class="form-grid">
+                    <div><label>Search Products</label><input type="text" id="productSearch" placeholder="Search by name, category, brand, model..."></div>
                 </div>
                 <div id="productList" style="max-height: 500px; overflow-y: auto;"></div>
             </div>
@@ -373,12 +342,12 @@
                 <input type="text" id="saleProductSearch" placeholder="Search by name, category, brand..." style="width:100%; margin-bottom: 15px;">
                 <div id="saleProductList" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
                 <h4>Cart</h4>
-                <table id="saleCartTable"><thead><tr><th>Product</th><th>Qty/Serial</th><th>Price</th><th>Total</th><th>Action</th></tr></thead><tbody></tbody></table>
+                <table id="saleCartTable"><thead><tr><th>Product</th><th>Serial/Quantity</th><th>Price</th><th>Total</th><th>Action</th></tr></thead><tbody></tbody></table>
                 <button id="completeSaleBtn" class="success" style="margin-top: 15px;">Complete Sale</button>
             </div>
         </div>
 
-        <!-- Ledger - Complete Payable/Receivable -->
+        <!-- Ledger -->
         <div id="ledgerContent" style="display:none;">
             <div class="card">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-book"></i> Ledger Management</h3>
@@ -389,39 +358,42 @@
                 </div>
                 <div id="ledgerList"></div>
             </div>
-            
             <div class="card">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-exchange-alt"></i> Add Ledger Transaction</h3>
                 <div class="form-grid">
-                    <div><label>Party Name</label><input id="ledgerPartyName" class="party-input" placeholder="Customer or Supplier name"></div>
-                    <div><label>Party Type</label><select id="ledgerPartyType"><option value="customer">Customer (Receivable)</option><option value="supplier">Supplier (Payable)</option></select></div>
+                    <div><label>Party Name</label><input id="ledgerPartyName" class="party-input"></div>
+                    <div><label>Party Type</label><select id="ledgerPartyType"><option value="customer">Customer</option><option value="supplier">Supplier</option></select></div>
                     <div><label>Transaction Type</label><select id="ledgerTransType"><option value="debit">Debit (They owe us)</option><option value="credit">Credit (We owe them)</option></select></div>
-                    <div><label>Amount</label><input type="number" id="ledgerAmount" placeholder="Amount"></div>
-                    <div><label>Description</label><input id="ledgerDesc" placeholder="Payment/Invoice reference"></div>
+                    <div><label>Amount</label><input type="number" id="ledgerAmount"></div>
+                    <div><label>Description</label><input id="ledgerDesc"></div>
                 </div>
                 <button id="addLedgerEntryBtn">Add Transaction</button>
             </div>
         </div>
 
-        <!-- Warranty Management -->
+        <!-- Warranty -->
         <div id="warrantyContent" style="display:none;">
             <div class="card">
                 <h3 style="margin-bottom: 20px;"><i class="fas fa-shield-alt"></i> Warranty Claim</h3>
                 <div class="form-grid">
                     <div><label>Product Name</label><input id="warrantyProduct" class="product-name-input"></div>
-                    <div><label>Serial Number</label><input id="warrantySerial"></div>
+                    <div><label>Product Serial Number</label><input id="warrantySerial" placeholder="BIZ-PROD-XXXX"></div>
                     <div><label>Customer Name</label><input id="warrantyCustomer" class="customer-input"></div>
                     <div><label>Customer Phone</label><input id="warrantyPhone"></div>
                     <div><label>Purchase Date</label><input type="date" id="warrantyPurchaseDate"></div>
                     <div><label>Issue Description</label><input id="warrantyIssue" placeholder="Problem details"></div>
-                    <div><label>Status</label><select id="warrantyStatus"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="delivered">Delivered to Customer</option><option value="cancelled">Cancelled</option></select></div>
+                    <div><label>Status</label><select id="warrantyStatus"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div>
                 </div>
-                <button id="addWarrantyBtn">Add Warranty Claim</button>
+                <h4 style="margin: 15px 0 10px 0;"><i class="fas fa-box-open"></i> Accessories / Items given with product</h4>
+                <div class="form-grid">
+                    <div><label>Accessory Name</label><input id="warrantyAccessoryName" placeholder="e.g., Charger, Cable, Box, Battery"></div>
+                    <div><label>Quantity</label><input id="warrantyAccessoryQty" type="number" value="1"></div>
+                    <div><button id="addWarrantyAccessoryBtn">Add Accessory</button></div>
+                </div>
+                <div id="warrantyAccessoriesList" style="margin-bottom: 15px;"></div>
+                <button id="addWarrantyBtn" class="success">Submit Warranty Claim</button>
             </div>
-            <div class="card">
-                <h3>Warranty Claims List</h3>
-                <div id="warrantyList"></div>
-            </div>
+            <div class="card"><h3>Warranty Claims</h3><div id="warrantyList"></div></div>
         </div>
 
         <!-- Service Center -->
@@ -432,13 +404,20 @@
                     <div><label>Product Category</label><input id="serviceCategory" class="category-input"></div>
                     <div><label>Brand</label><input id="serviceBrand" class="brand-input"></div>
                     <div><label>Model</label><input id="serviceModel" class="model-input"></div>
-                    <div><label>Serial Number</label><input id="serviceSerial"></div>
+                    <div><label>Serial Number</label><input id="serviceSerial" placeholder="BIZ-PROD-XXXX"></div>
                     <div><label>Customer Name</label><input id="serviceCustomer" class="customer-input"></div>
                     <div><label>Customer Phone</label><input id="servicePhone"></div>
                     <div><label>Problem Description</label><input id="serviceProblem" placeholder="What's the issue?"></div>
                     <div><label>Status</label><select id="serviceStatus"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div>
                 </div>
-                <button id="addServiceBtn">Add Service Request</button>
+                <h4 style="margin: 15px 0 10px 0;"><i class="fas fa-box-open"></i> Accessories / Items given with product</h4>
+                <div class="form-grid">
+                    <div><label>Accessory Name</label><input id="serviceAccessoryName" placeholder="e.g., Charger, Cable, Box"></div>
+                    <div><label>Quantity</label><input id="serviceAccessoryQty" type="number" value="1"></div>
+                    <div><button id="addServiceAccessoryBtn">Add Accessory</button></div>
+                </div>
+                <div id="serviceAccessoriesList" style="margin-bottom: 15px;"></div>
+                <button id="addServiceBtn" class="success">Submit Service Request</button>
             </div>
             <div class="card"><h3>Service Requests</h3><div id="serviceList"></div></div>
         </div>
@@ -502,11 +481,24 @@ let ledgerEntries = [];
 let warranties = [];
 let services = [];
 
+// Helper: Generate unique product serial number
+let lastProductSerial = parseInt(localStorage.getItem('lastProductSerial') || '1000');
+
+function generateProductSerial() {
+    lastProductSerial++;
+    localStorage.setItem('lastProductSerial', lastProductSerial);
+    return 'BIZ-PROD-' + lastProductSerial.toString().padStart(6, '0');
+}
+
 function generateId() { return Date.now() + '-' + Math.random().toString(36).substr(2, 9); }
+
+// Warranty accessories storage
+let warrantyAccessories = [];
+let serviceAccessories = [];
 
 // ==================== LOAD/SAVE ====================
 function loadData() {
-    let saved = localStorage.getItem('bizmanage_data_v2');
+    let saved = localStorage.getItem('bizmanage_data_v3');
     if(saved) {
         let data = JSON.parse(saved);
         products = data.products || [];
@@ -516,12 +508,13 @@ function loadData() {
         warranties = data.warranties || [];
         services = data.services || [];
         shopInfo = data.shopInfo || shopInfo;
+        lastProductSerial = data.lastProductSerial || 1000;
     }
 }
 
 function saveData() {
-    let data = { products, purchases, invoices, ledgerEntries, warranties, services, shopInfo };
-    localStorage.setItem('bizmanage_data_v2', JSON.stringify(data));
+    let data = { products, purchases, invoices, ledgerEntries, warranties, services, shopInfo, lastProductSerial };
+    localStorage.setItem('bizmanage_data_v3', JSON.stringify(data));
     refreshDashboard();
     renderLedgerList();
     renderWarrantyList();
@@ -534,36 +527,30 @@ function refreshDashboard() {
     document.getElementById('totalProducts').innerText = products.length;
     let invValue = products.reduce((s,p) => s + (p.stock * p.sellingPrice), 0);
     document.getElementById('inventoryValue').innerText = '$' + invValue.toFixed(2);
-    
     let receivables = ledgerEntries.filter(l => l.partyType === 'customer').reduce((s,l) => s + (l.type === 'debit' ? l.amount : -l.amount), 0);
     let payables = ledgerEntries.filter(l => l.partyType === 'supplier').reduce((s,l) => s + (l.type === 'credit' ? l.amount : -l.amount), 0);
     document.getElementById('totalReceivables').innerText = '$' + Math.abs(receivables).toFixed(2);
     document.getElementById('totalPayables').innerText = '$' + Math.abs(payables).toFixed(2);
-    
     if(window.dashChart) window.dashChart.data.datasets[0].data = [invValue, Math.abs(receivables), Math.abs(payables)];
     if(window.dashChart) window.dashChart.update();
 }
 
 // ==================== PRODUCT MANAGEMENT ====================
-function renderProductList(searchTerm = '', categoryFilter = '', brandFilter = '') {
+function renderProductList(searchTerm = '') {
     let container = document.getElementById('productList');
     if(!container) return;
-    
     let filtered = products;
     if(searchTerm) {
         let term = searchTerm.toLowerCase();
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(term) || p.model.toLowerCase().includes(term) || p.brand.toLowerCase().includes(term) || p.category.toLowerCase().includes(term));
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(term) || p.model.toLowerCase().includes(term) || p.brand.toLowerCase().includes(term) || p.category.toLowerCase().includes(term) || p.serialNumber.toLowerCase().includes(term));
     }
-    if(categoryFilter) filtered = filtered.filter(p => p.category === categoryFilter);
-    if(brandFilter) filtered = filtered.filter(p => p.brand === brandFilter);
-    
     container.innerHTML = filtered.map(p => `
         <div class="product-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <strong>${p.name}</strong> <span style="color:#64748b;">(${p.model})</span>
                     <div style="font-size:12px; color:#64748b;">${p.category} / ${p.brand}</div>
-                    <div>Stock: <span style="font-weight:600;">${p.stock}</span> | Price: $${p.sellingPrice} | Warranty: ${p.warranty} months</div>
+                    <div><span class="serial-badge">${p.serialNumber}</span> | Stock: <span style="font-weight:600;">${p.stock}</span> | Price: $${p.sellingPrice}</div>
                 </div>
                 <div class="product-price">$${p.sellingPrice}</div>
             </div>
@@ -571,21 +558,11 @@ function renderProductList(searchTerm = '', categoryFilter = '', brandFilter = '
     `).join('');
 }
 
-function updateFilters() {
-    let categories = [...new Set(products.map(p => p.category))];
-    let brands = [...new Set(products.map(p => p.brand))];
-    let catContainer = document.getElementById('categoryFilters');
-    let brandContainer = document.getElementById('brandFilters');
-    if(catContainer) catContainer.innerHTML = '<span style="font-size:12px;">Categories:</span> ' + categories.map(c => `<span class="filter-chip" onclick="filterByCategory(\'${c}\')">${c}</span>`).join('');
-    if(brandContainer) brandContainer.innerHTML = '<span style="font-size:12px;">Brands:</span> ' + brands.map(b => `<span class="filter-chip" onclick="filterByBrand(\'${b}\')">${b}</span>`).join('');
-}
-
-window.filterByCategory = (cat) => renderProductList(document.getElementById('productSearch')?.value || '', cat, '');
-window.filterByBrand = (brand) => renderProductList(document.getElementById('productSearch')?.value || '', '', brand);
-
 document.getElementById('addProductBtn')?.addEventListener('click', () => {
+    let serialNumber = generateProductSerial();
     let product = {
         id: generateId(),
+        serialNumber: serialNumber,
         category: document.getElementById('prodCategory').value,
         brand: document.getElementById('prodBrand').value,
         name: document.getElementById('prodName').value,
@@ -602,9 +579,8 @@ document.getElementById('addProductBtn')?.addEventListener('click', () => {
     products.push(product);
     saveData();
     renderProductList();
-    updateFilters();
     populateSelectors();
-    alert(`Product "${product.name}" added`);
+    alert(`Product "${product.name}" added! Serial Number: ${serialNumber}\nKeep this serial number on the product.`);
     document.getElementById('prodName').value = '';
     document.getElementById('prodSerials').value = '';
 });
@@ -613,6 +589,127 @@ document.getElementById('prodType')?.addEventListener('change', (e) => {
     document.getElementById('serialArea').style.display = e.target.value === 'serial' ? 'block' : 'none';
 });
 document.getElementById('productSearch')?.addEventListener('keyup', (e) => renderProductList(e.target.value));
+
+// ==================== WARRANTY ACCESSORIES ====================
+function renderWarrantyAccessories() {
+    let container = document.getElementById('warrantyAccessoriesList');
+    if(!container) return;
+    container.innerHTML = warrantyAccessories.map((a, idx) => `
+        <span class="accessory-item">${a.name} x${a.qty} <i class="fas fa-times-circle" style="cursor:pointer; color:#ef4444; margin-left:8px;" onclick="removeWarrantyAccessory(${idx})"></i></span>
+    `).join('');
+    if(warrantyAccessories.length === 0) container.innerHTML = '<span style="color:#94a3b8; font-size:12px;">No accessories added</span>';
+}
+
+window.removeWarrantyAccessory = (idx) => { warrantyAccessories.splice(idx,1); renderWarrantyAccessories(); };
+document.getElementById('addWarrantyAccessoryBtn')?.addEventListener('click', () => {
+    let name = document.getElementById('warrantyAccessoryName').value;
+    let qty = parseInt(document.getElementById('warrantyAccessoryQty').value);
+    if(name) { warrantyAccessories.push({ name, qty }); renderWarrantyAccessories(); document.getElementById('warrantyAccessoryName').value = ''; }
+});
+
+function renderServiceAccessories() {
+    let container = document.getElementById('serviceAccessoriesList');
+    if(!container) return;
+    container.innerHTML = serviceAccessories.map((a, idx) => `
+        <span class="accessory-item">${a.name} x${a.qty} <i class="fas fa-times-circle" style="cursor:pointer; color:#ef4444; margin-left:8px;" onclick="removeServiceAccessory(${idx})"></i></span>
+    `).join('');
+    if(serviceAccessories.length === 0) container.innerHTML = '<span style="color:#94a3b8; font-size:12px;">No accessories added</span>';
+}
+window.removeServiceAccessory = (idx) => { serviceAccessories.splice(idx,1); renderServiceAccessories(); };
+document.getElementById('addServiceAccessoryBtn')?.addEventListener('click', () => {
+    let name = document.getElementById('serviceAccessoryName').value;
+    let qty = parseInt(document.getElementById('serviceAccessoryQty').value);
+    if(name) { serviceAccessories.push({ name, qty }); renderServiceAccessories(); document.getElementById('serviceAccessoryName').value = ''; }
+});
+
+// ==================== WARRANTY ====================
+function renderWarrantyList() {
+    let container = document.getElementById('warrantyList');
+    if(container) container.innerHTML = warranties.map(w => `
+        <div class="warranty-card">
+            <div style="display:flex; justify-content:space-between;">
+                <div><strong>${w.product}</strong> <span class="serial-badge" style="font-size:10px;">${w.serial}</span></div>
+                <div><span class="badge badge-${w.status}">${w.status}</span></div>
+            </div>
+            <div>Customer: ${w.customer} | Phone: ${w.phone}</div>
+            <div>Issue: ${w.issue} | Purchase: ${w.purchaseDate}</div>
+            <div><strong>Accessories:</strong> ${w.accessories?.map(a => `${a.name} x${a.qty}`).join(', ') || 'None'}</div>
+            <div style="margin-top:10px;">
+                <select onchange="updateWarrantyStatus('${w.id}', this.value)"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
+                <button onclick="printWarrantyPDF('${w.id}')" class="secondary">Print</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.updateWarrantyStatus = (id, status) => {
+    let w = warranties.find(w => w.id === id);
+    if(w) { w.status = status; saveData(); renderWarrantyList(); }
+};
+
+document.getElementById('addWarrantyBtn')?.addEventListener('click', () => {
+    warranties.push({ 
+        id: generateId(), 
+        product: document.getElementById('warrantyProduct').value, 
+        serial: document.getElementById('warrantySerial').value, 
+        customer: document.getElementById('warrantyCustomer').value, 
+        phone: document.getElementById('warrantyPhone').value, 
+        purchaseDate: document.getElementById('warrantyPurchaseDate').value, 
+        issue: document.getElementById('warrantyIssue').value, 
+        status: document.getElementById('warrantyStatus').value,
+        accessories: [...warrantyAccessories]
+    });
+    warrantyAccessories = [];
+    renderWarrantyAccessories();
+    saveData();
+    renderWarrantyList();
+    alert('Warranty claim added');
+});
+
+// ==================== SERVICE ====================
+function renderServiceList() {
+    let container = document.getElementById('serviceList');
+    if(container) container.innerHTML = services.map(s => `
+        <div class="service-card">
+            <div style="display:flex; justify-content:space-between;">
+                <div><strong>${s.category} / ${s.brand}</strong> (${s.model}) <span class="serial-badge" style="font-size:10px;">${s.serial}</span></div>
+                <div><span class="badge badge-${s.status}">${s.status}</span></div>
+            </div>
+            <div>Customer: ${s.customer} | Phone: ${s.phone}</div>
+            <div>Problem: ${s.problem}</div>
+            <div><strong>Accessories:</strong> ${s.accessories?.map(a => `${a.name} x${a.qty}`).join(', ') || 'None'}</div>
+            <div style="margin-top:10px;">
+                <select onchange="updateServiceStatus('${s.id}', this.value)"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
+                <button onclick="printServicePDF('${s.id}')" class="secondary">Print</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.updateServiceStatus = (id, status) => {
+    let s = services.find(s => s.id === id);
+    if(s) { s.status = status; saveData(); renderServiceList(); }
+};
+
+document.getElementById('addServiceBtn')?.addEventListener('click', () => {
+    services.push({ 
+        id: generateId(), 
+        category: document.getElementById('serviceCategory').value, 
+        brand: document.getElementById('serviceBrand').value, 
+        model: document.getElementById('serviceModel').value, 
+        serial: document.getElementById('serviceSerial').value, 
+        customer: document.getElementById('serviceCustomer').value, 
+        phone: document.getElementById('servicePhone').value, 
+        problem: document.getElementById('serviceProblem').value, 
+        status: document.getElementById('serviceStatus').value,
+        accessories: [...serviceAccessories]
+    });
+    serviceAccessories = [];
+    renderServiceAccessories();
+    saveData();
+    renderServiceList();
+    alert('Service request added');
+});
 
 // ==================== PURCHASE ====================
 let purchaseItems = [];
@@ -640,23 +737,17 @@ document.getElementById('completePurchaseBtn')?.addEventListener('click', () => 
     let supplier = document.getElementById('purchaseSupplier').value;
     if(!supplier) return alert('Supplier required');
     if(purchaseItems.length === 0) return alert('Add items');
-    
     let total = purchaseItems.reduce((s,i) => s + (i.qty * i.price), 0);
     let paymentType = document.getElementById('purchasePaymentType').value;
-    
     for(let item of purchaseItems) {
         let product = products.find(p => p.id == item.id);
         if(product) product.stock += item.qty;
     }
-    
     let purchase = { id: generateId(), date: document.getElementById('purchaseDate').value || new Date().toISOString().split('T')[0], supplier, items: [...purchaseItems], total, paymentType };
     purchases.push(purchase);
-    
-    // Auto ledger entry for supplier
     if(paymentType === 'credit') {
         ledgerEntries.push({ id: generateId(), partyName: supplier, partyType: 'supplier', type: 'credit', amount: total, date: purchase.date, description: `Purchase - ${purchase.id}` });
     }
-    
     purchaseItems = [];
     saveData();
     renderPurchaseItems();
@@ -667,7 +758,7 @@ document.getElementById('completePurchaseBtn')?.addEventListener('click', () => 
 
 function loadPurchaseHistory() {
     let container = document.getElementById('purchaseHistoryList');
-    if(container) container.innerHTML = purchases.slice(-10).reverse().map(p => `<div class="product-card"><strong>${p.date}</strong> - ${p.supplier} - $${p.total} - ${p.paymentType}</div>`).join('');
+    if(container) container.innerHTML = purchases.slice(-10).reverse().map(p => `<div class="product-card"><strong>${p.date}</strong> - ${p.supplier} - $${p.total}</div>`).join('');
 }
 
 // ==================== SALES ====================
@@ -679,12 +770,12 @@ function renderSaleProductList(searchTerm = '') {
     let available = products.filter(p => p.stock > 0);
     if(searchTerm) {
         let term = searchTerm.toLowerCase();
-        available = available.filter(p => p.name.toLowerCase().includes(term) || p.model.toLowerCase().includes(term) || p.brand.toLowerCase().includes(term) || p.category.toLowerCase().includes(term));
+        available = available.filter(p => p.name.toLowerCase().includes(term) || p.model.toLowerCase().includes(term));
     }
     container.innerHTML = available.map(p => `
         <div class="product-card" onclick="addToSaleCart('${p.id}')">
             <div style="display:flex; justify-content:space-between;">
-                <div><strong>${p.name}</strong> (${p.model})<br><small>Stock: ${p.stock} | Price: $${p.sellingPrice}</small></div>
+                <div><strong>${p.name}</strong> (${p.model})<br><small>Serial: ${p.serialNumber} | Stock: ${p.stock}</small></div>
                 <div class="product-price">$${p.sellingPrice}</div>
             </div>
         </div>
@@ -694,52 +785,58 @@ function renderSaleProductList(searchTerm = '') {
 window.addToSaleCart = function(productId) {
     let product = products.find(p => p.id == productId);
     if(!product) return;
-    if(product.type === 'non_serial') {
-        let qty = prompt(`Quantity for ${product.name} (Available: ${product.stock})`, '1');
-        qty = parseInt(qty);
-        if(qty > 0 && qty <= product.stock) saleCart.push({ id: generateId(), productId, name: product.name, qty, price: product.sellingPrice, total: qty * product.sellingPrice });
-    } else {
-        let available = product.serials.filter(s => !product.soldSerials?.includes(s));
-        if(available.length === 0) return alert('No serials available');
-        let serial = prompt(`Enter serial number\nAvailable: ${available.join(', ')}`);
-        if(available.includes(serial)) saleCart.push({ id: generateId(), productId, name: product.name, qty: 1, serials: [serial], price: product.sellingPrice, total: product.sellingPrice });
+    let qty = prompt(`Quantity for ${product.name}\nSerial: ${product.serialNumber}\nAvailable: ${product.stock}`, '1');
+    qty = parseInt(qty);
+    if(qty > 0 && qty <= product.stock) {
+        saleCart.push({ id: generateId(), productId, name: product.name, serial: product.serialNumber, qty, price: product.sellingPrice, total: qty * product.sellingPrice });
+        renderSaleCart();
+        renderSaleProductList(document.getElementById('saleProductSearch')?.value || '');
     }
-    renderSaleCart();
-    renderSaleProductList(document.getElementById('saleProductSearch')?.value || '');
 };
 
 function renderSaleCart() {
     let tbody = document.querySelector('#saleCartTable tbody');
     if(!tbody) return;
     tbody.innerHTML = saleCart.map((item, idx) => `
-        <tr><td>${item.name}</td><td>${item.serials?.length ? item.serials.join(',') : item.qty}</td><td>$${item.price}</td><td>$${item.total}</td><td><button class="danger" onclick="removeSaleCartItem(${idx})">Remove</button></td></tr>
+        <tr><td>${item.name}<br><small class="serial-badge" style="font-size:10px;">${item.serial}</small></td><td>${item.qty}</td><td>$${item.price}</td><td>$${item.total}</td><td><button class="danger" onclick="removeSaleCartItem(${idx})">Remove</button></td></tr>
     `).join('');
     if(saleCart.length === 0) tbody.innerHTML = '<tr><td colspan="5">Cart empty</td></tr>';
 }
 window.removeSaleCartItem = (idx) => { saleCart.splice(idx,1); renderSaleCart(); };
 
+function printInvoice(invoice) {
+    let win = window.open();
+    win.document.write(`
+        <html><head><title>Invoice ${invoice.no}</title>
+        <style>body{font-family:'Inter',sans-serif;padding:30px;} .invoice{max-width:800px;margin:auto;border:1px solid #ddd;padding:30px;border-radius:16px;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:10px;} .signature{margin-top:40px;display:flex;justify-content:space-between;}</style></head>
+        <body><div class="invoice">
+            <div class="header"><h2>${shopInfo.name}</h2><p>${shopInfo.address} | ${shopInfo.phone}</p><h3>INVOICE #${invoice.no}</h3><p>Date: ${invoice.date}</p></div>
+            <div><strong>Customer:</strong> ${invoice.customer}<br>${invoice.phone}</div>
+            <table><thead><tr><th>Product</th><th>Serial</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>
+            ${invoice.items.map(i => `<tr><td>${i.name}</td><td>${i.serial}</td><td>${i.qty}</td><td>$${i.price}</td><td>$${i.total}</td></tr>`).join('')}
+            </tbody><tfoot><tr><td colspan="4"><strong>Total</strong></td><td><strong>$${invoice.total}</strong></td></tr></tfoot>
+            </table>
+            <div class="signature"><div>Customer Signature</div><div>Authorized Signature</div></div>
+        </div><script>window.print();<\/script></body></html>
+    `);
+}
+
 document.getElementById('completeSaleBtn')?.addEventListener('click', () => {
     let customer = document.getElementById('saleCustomer').value;
     if(!customer) return alert('Customer required');
     if(saleCart.length === 0) return alert('Cart empty');
-    
     let total = saleCart.reduce((s,i) => s + i.total, 0);
     let paymentType = document.getElementById('salePaymentType').value;
     let invoiceNo = 'INV-' + new Date().getFullYear() + '-' + (invoices.length + 1001);
-    
     for(let item of saleCart) {
         let product = products.find(p => p.id == item.productId);
-        if(product.type === 'non_serial') product.stock -= item.qty;
-        else { product.soldSerials = product.soldSerials || []; product.soldSerials.push(...item.serials); product.stock = product.serials.filter(s => !product.soldSerials.includes(s)).length; }
+        if(product) product.stock -= item.qty;
     }
-    
     let invoice = { no: invoiceNo, date: new Date().toLocaleString(), customer, phone: document.getElementById('salePhone').value, address: document.getElementById('saleAddress').value, items: [...saleCart], total, paymentType };
     invoices.push(invoice);
-    
     if(paymentType === 'due') {
         ledgerEntries.push({ id: generateId(), partyName: customer, partyType: 'customer', type: 'debit', amount: total, date: new Date().toISOString().split('T')[0], description: `Invoice ${invoiceNo}` });
     }
-    
     saleCart = [];
     saveData();
     renderSaleCart();
@@ -748,32 +845,12 @@ document.getElementById('completeSaleBtn')?.addEventListener('click', () => {
     alert(`Sale completed! Invoice: ${invoiceNo}`);
 });
 
-function printInvoice(invoice) {
-    let win = window.open();
-    win.document.write(`
-        <html><head><title>Invoice ${invoice.no}</title>
-        <style>body{font-family:'Inter',sans-serif;padding:30px;} .invoice{max-width:800px;margin:auto;border:1px solid #ddd;padding:30px;border-radius:16px;} .header{text-align:center;margin-bottom:30px;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:10px;text-align:left;} .signature{margin-top:40px;display:flex;justify-content:space-between;}</style></head>
-        <body><div class="invoice">
-            <div class="header"><h2>${shopInfo.name}</h2><p>${shopInfo.address} | ${shopInfo.phone} | ${shopInfo.email}</p><h3>INVOICE #${invoice.no}</h3><p>Date: ${invoice.date}</p></div>
-            <div><strong>Customer:</strong> ${invoice.customer}<br>${invoice.phone}<br>${invoice.address}</div>
-            <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>
-            ${invoice.items.map(i => `<tr><td>${i.name}</td><td>${i.serials?.length ? i.serials.join(',') : i.qty}</td><td>$${i.price}</td><td>$${i.total}</td></tr>`).join('')}
-            </tbody><tfoot><tr><td colspan="3"><strong>Total</strong></td><td><strong>$${invoice.total}</strong></td></tr></tfoot>
-            </table>
-            <div class="signature"><div>Customer Signature</div><div>Authorized Signature</div></div>
-            <div style="text-align:center; margin-top:30px;">${shopInfo.name} | Powered by BizCore</div>
-        </div><script>window.print();<\/script></body></html>
-    `);
-}
-
 // ==================== LEDGER ====================
 function renderLedgerList() {
     let container = document.getElementById('ledgerList');
     if(!container) return;
-    
     let type = document.getElementById('ledgerTypeSelect')?.value || 'all';
     let search = document.getElementById('ledgerSearch')?.value.toLowerCase() || '';
-    
     let parties = {};
     ledgerEntries.forEach(l => {
         if((type === 'all' || l.partyType === type) && (!search || l.partyName.toLowerCase().includes(search))) {
@@ -781,38 +858,21 @@ function renderLedgerList() {
             parties[l.partyName].balance += l.type === 'debit' ? l.amount : -l.amount;
         }
     });
-    
-    container.innerHTML = `
-        <table><thead><tr><th>Party Name</th><th>Type</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead><tbody>
-        ${Object.values(parties).map(p => `
-            <tr>
-                <td><strong>${p.name}</strong></td>
-                <td>${p.type === 'customer' ? 'Customer' : 'Supplier'}</td>
-                <td>$${Math.abs(p.balance).toFixed(2)}</td>
-                <td><span class="badge ${p.balance > 0 ? 'badge-pending' : 'badge-paid'}">${p.balance > 0 ? (p.type === 'customer' ? 'Owes us' : 'We owe') : 'Settled'}</span></td>
-                <td><button onclick="viewPartyLedger('${p.name}')">View Details</button></td>
-            </tr>
-        `).join('')}
-        </tbody></table>
-    `;
+    container.innerHTML = `<table><thead><tr><th>Party Name</th><th>Type</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead><tbody>
+        ${Object.values(parties).map(p => `<tr><td><strong>${p.name}</strong></td><td>${p.type === 'customer' ? 'Customer' : 'Supplier'}</td><td>$${Math.abs(p.balance).toFixed(2)}</td><td><span class="badge ${p.balance > 0 ? 'badge-pending' : 'badge-paid'}">${p.balance > 0 ? (p.type === 'customer' ? 'Owes us' : 'We owe') : 'Settled'}</span></td><td><button onclick="viewPartyLedger('${p.name}')">View Details</button></td></tr>`).join('')}
+    </tbody></table>`;
 }
 
 window.viewPartyLedger = (partyName) => {
     let transactions = ledgerEntries.filter(l => l.partyName === partyName);
     let balance = 0;
-    let html = `<h4>Ledger: ${partyName}</h4><table><thead><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead><tbody>`;
+    let html = `<h4>Ledger: ${partyName}</h4><table style="width:100%"><thead><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr></thead><tbody>`;
     transactions.forEach(t => {
         balance += t.type === 'debit' ? t.amount : -t.amount;
         html += `<tr><td>${t.date}</td><td>${t.description}</td><td>${t.type === 'debit' ? '$' + t.amount : '-'}</td><td>${t.type === 'credit' ? '$' + t.amount : '-'}</td><td>$${Math.abs(balance)} ${balance > 0 ? '(Receivable)' : '(Payable)'}</td></tr>`;
     });
     html += `</tbody></table><button onclick="printLedgerPDF('${partyName}')" class="secondary" style="margin-top:15px;">Print PDF</button>`;
     document.getElementById('ledgerList').innerHTML = html;
-};
-
-window.printLedgerPDF = (partyName) => {
-    let content = document.getElementById('ledgerList').innerHTML;
-    let win = window.open();
-    win.document.write(`<html><head><title>Ledger - ${partyName}</title><style>body{font-family:'Inter',sans-serif;padding:30px;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #ddd;padding:8px;}</style></head><body><h2>Ledger: ${partyName}</h2>${content}<p>Generated: ${new Date().toLocaleString()}</p><script>window.print();<\/script></body></html>`);
 };
 
 document.getElementById('addLedgerEntryBtn')?.addEventListener('click', () => {
@@ -828,70 +888,6 @@ document.getElementById('addLedgerEntryBtn')?.addEventListener('click', () => {
 });
 
 document.getElementById('refreshLedgerBtn')?.addEventListener('click', () => renderLedgerList());
-document.getElementById('ledgerTypeSelect')?.addEventListener('change', () => renderLedgerList());
-document.getElementById('ledgerSearch')?.addEventListener('keyup', () => renderLedgerList());
-
-// ==================== WARRANTY ====================
-function renderWarrantyList() {
-    let container = document.getElementById('warrantyList');
-    if(container) container.innerHTML = warranties.map(w => `
-        <div class="warranty-card">
-            <div style="display:flex; justify-content:space-between;">
-                <div><strong>${w.product}</strong> (S/N: ${w.serial})</div>
-                <div><span class="badge badge-${w.status}">${w.status}</span></div>
-            </div>
-            <div>Customer: ${w.customer} | Phone: ${w.phone}</div>
-            <div>Issue: ${w.issue} | Purchase: ${w.purchaseDate}</div>
-            <div style="margin-top:10px;">
-                <select onchange="updateWarrantyStatus('${w.id}', this.value)"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
-                <button onclick="printWarrantyPDF('${w.id}')" class="secondary">Print</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-window.updateWarrantyStatus = (id, status) => {
-    let w = warranties.find(w => w.id === id);
-    if(w) { w.status = status; saveData(); renderWarrantyList(); }
-};
-
-document.getElementById('addWarrantyBtn')?.addEventListener('click', () => {
-    warranties.push({ id: generateId(), product: document.getElementById('warrantyProduct').value, serial: document.getElementById('warrantySerial').value, customer: document.getElementById('warrantyCustomer').value, phone: document.getElementById('warrantyPhone').value, purchaseDate: document.getElementById('warrantyPurchaseDate').value, issue: document.getElementById('warrantyIssue').value, status: document.getElementById('warrantyStatus').value });
-    saveData();
-    renderWarrantyList();
-    alert('Warranty claim added');
-});
-
-// ==================== SERVICE CENTER ====================
-function renderServiceList() {
-    let container = document.getElementById('serviceList');
-    if(container) container.innerHTML = services.map(s => `
-        <div class="service-card">
-            <div style="display:flex; justify-content:space-between;">
-                <div><strong>${s.category} / ${s.brand}</strong> (${s.model})</div>
-                <div><span class="badge badge-${s.status}">${s.status}</span></div>
-            </div>
-            <div>S/N: ${s.serial} | Customer: ${s.customer} | Phone: ${s.phone}</div>
-            <div>Problem: ${s.problem}</div>
-            <div style="margin-top:10px;">
-                <select onchange="updateServiceStatus('${s.id}', this.value)"><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
-                <button onclick="printServicePDF('${s.id}')" class="secondary">Print</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-window.updateServiceStatus = (id, status) => {
-    let s = services.find(s => s.id === id);
-    if(s) { s.status = status; saveData(); renderServiceList(); }
-};
-
-document.getElementById('addServiceBtn')?.addEventListener('click', () => {
-    services.push({ id: generateId(), category: document.getElementById('serviceCategory').value, brand: document.getElementById('serviceBrand').value, model: document.getElementById('serviceModel').value, serial: document.getElementById('serviceSerial').value, customer: document.getElementById('serviceCustomer').value, phone: document.getElementById('servicePhone').value, problem: document.getElementById('serviceProblem').value, status: document.getElementById('serviceStatus').value });
-    saveData();
-    renderServiceList();
-    alert('Service request added');
-});
 
 // ==================== INVOICES ====================
 function renderInvoiceList() {
@@ -902,21 +898,17 @@ function renderInvoiceList() {
     let container = document.getElementById('invoiceList');
     if(container) container.innerHTML = `<table><thead><tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Total</th><th>Action</th></tr></thead><tbody>${filtered.map(i => `<tr><td>${i.no}</td><td>${i.date}</td><td>${i.customer}</td><td>$${i.total}</td><td><button onclick="printInvoiceByNo('${i.no}')">Print</button></td></tr>`).join('')}</tbody></table>`;
 }
-
 window.printInvoiceByNo = (no) => { let inv = invoices.find(i => i.no === no); if(inv) printInvoice(inv); };
 document.getElementById('searchInvoicesBtn')?.addEventListener('click', () => renderInvoiceList());
 
 // ==================== REPORTS ====================
 document.getElementById('generateReportBtn')?.addEventListener('click', () => {
     let type = document.getElementById('reportType').value;
-    let start = document.getElementById('reportStart').value;
-    let end = document.getElementById('reportEnd').value;
     let html = '';
     if(type === 'stock') {
-        html = `<h3>Stock Report</h3><table><thead><tr><th>Product</th><th>Category/Brand</th><th>Stock</th><th>Price</th><th>Value</th></tr></thead><tbody>${products.map(p => `<tr><td>${p.name}</td><td>${p.category}/${p.brand}</td><td>${p.stock}</td><td>$${p.sellingPrice}</td><td>$${p.stock * p.sellingPrice}</td></tr>`).join('')}</tbody></table>`;
+        html = `<h3>Stock Report</h3><table style="width:100%"><thead><tr><th>Serial</th><th>Product</th><th>Category</th><th>Stock</th><th>Price</th><th>Value</th></tr></thead><tbody>${products.map(p => `<tr><td><span class="serial-badge">${p.serialNumber}</span></td><td>${p.name}</td><td>${p.category}</td><td>${p.stock}</td><td>$${p.sellingPrice}</td><td>$${p.stock * p.sellingPrice}</td></tr>`).join('')}</tbody></table>`;
     } else if(type === 'sales') {
-        let filtered = invoices.filter(i => (!start || new Date(i.date) >= new Date(start)) && (!end || new Date(i.date) <= new Date(end)));
-        html = `<h3>Sales Report</h3><table><thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Total</th></tr></thead><tbody>${filtered.map(i => `<tr><td>${i.no}</td><td>${i.customer}</td><td>${i.date}</td><td>$${i.total}</td></tr>`).join('')}<tr><td colspan="3"><strong>Total</strong></td><td><strong>$${filtered.reduce((s,i)=>s+i.total,0)}</strong></td></tr></tbody></table>`;
+        html = `<h3>Sales Report</h3><table style="width:100%"><thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Total</th></tr></thead><tbody>${invoices.map(i => `<tr><td>${i.no}</td><td>${i.customer}</td><td>${i.date}</td><td>$${i.total}</td></tr>`).join('')}</tbody></table>`;
     }
     document.getElementById('reportOutput').innerHTML = html;
 });
@@ -930,25 +922,22 @@ document.getElementById('printReportBtn')?.addEventListener('click', () => {
 // ==================== SETTINGS & INIT ====================
 function populateSelectors() {
     let sel = document.getElementById('purchaseProductSelect');
-    if(sel) sel.innerHTML = '<option value="">Select Product</option>' + products.map(p => `<option value="${p.id}">${p.name} (${p.model}) - Stock: ${p.stock}</option>`).join('');
+    if(sel) sel.innerHTML = '<option value="">Select Product</option>' + products.map(p => `<option value="${p.id}">${p.name} (${p.model}) - ${p.serialNumber}</option>`).join('');
 }
 
 function setupAutocomplete() {
     let categories = [...new Set(products.map(p => p.category))];
     let brands = [...new Set(products.map(p => p.brand))];
     let productNames = products.map(p => p.name);
-    let models = products.map(p => p.model);
     $(".category-input, #serviceCategory").autocomplete({ source: categories, minLength: 0 });
     $(".brand-input, #serviceBrand").autocomplete({ source: brands, minLength: 0 });
     $(".product-name-input, #warrantyProduct").autocomplete({ source: productNames, minLength: 0 });
-    $(".model-input, #serviceModel").autocomplete({ source: models, minLength: 0 });
     $(".customer-input, #warrantyCustomer, #serviceCustomer").autocomplete({ source: [...new Set(invoices.map(i=>i.customer))], minLength: 0 });
 }
 
 function init() {
     loadData();
     renderProductList();
-    updateFilters();
     loadPurchaseHistory();
     renderLedgerList();
     renderWarrantyList();
@@ -959,7 +948,7 @@ function init() {
     refreshDashboard();
 }
 
-// ==================== LOGIN & NAVIGATION ====================
+// ==================== LOGIN ====================
 document.getElementById('loginBtn')?.addEventListener('click', () => {
     if(document.getElementById('loginUsername').value === 'admin' && document.getElementById('loginPassword').value === 'admin123') {
         document.getElementById('loginOverlay').style.display = 'none';
@@ -967,12 +956,12 @@ document.getElementById('loginBtn')?.addEventListener('click', () => {
         init();
     } else alert('Invalid credentials');
 });
-
 document.getElementById('logoutBtn')?.addEventListener('click', () => {
     document.getElementById('loginOverlay').style.display = 'flex';
     document.getElementById('appContainer').style.display = 'none';
 });
 
+// Navigation
 document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => {
         let page = item.getAttribute('data-page');
@@ -985,7 +974,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
         });
         let titles = { dashboard:'Dashboard', products:'Products', purchase:'Purchase', sales:'Sales', ledger:'Ledger', warranty:'Warranty', service:'Service Center', invoices:'Invoices', reports:'Reports', settings:'Settings' };
         document.getElementById('pageTitle').innerText = titles[page];
-        if(page === 'products') { renderProductList(); updateFilters(); }
+        if(page === 'products') renderProductList();
         if(page === 'purchase') loadPurchaseHistory();
         if(page === 'ledger') renderLedgerList();
         if(page === 'warranty') renderWarrantyList();
