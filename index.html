@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BizHR v2.0 | Cloud Ready Hotel HR System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        :root {
+            --primary: #1a4a6f;
+            --primary-dark: #0f2b3d;
+            --secondary: #f4a261;
+            --secondary-dark: #e76f51;
+            --success: #2a9d8f;
+            --danger: #e63946;
+            --warning: #e9c46a;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --glass: rgba(255, 255, 255, 0.95);
+            --glass-dark: rgba(30, 41, 59, 0.95);
+            --border: #e2e8f0;
+        }
+        body.dark {
+            --primary: #2c5f8a;
+            --light: #0f172a;
+            --glass: rgba(30, 41, 59, 0.95);
+            --border: #334155;
+            color: #e2e8f0;
+        }
+        body { background: linear-gradient(135deg, #0f2b3d 0%, #1a4a6f 100%); min-height: 100vh; }
+        
+        /* Login Overlay */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #0f2b3d, #1a4a6f);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; backdrop-filter: blur(10px);
+        }
+        .login-card {
+            background: rgba(255,255,255,0.98); padding: 40px; border-radius: 40px;
+            width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.6s ease;
+        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .login-card input { width: 100%; margin: 12px 0; padding: 14px 20px; border-radius: 50px; border: 1px solid #e2e8f0; }
+        .login-card button { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 50px; width: 100%; cursor: pointer; font-weight: 600; }
+        .login-card .error { color: var(--danger); font-size: 12px; margin-top: 5px; }
+        
+        .app { display: none; }
+        .sidebar {
+            width: 280px; background: var(--glass-dark); backdrop-filter: blur(10px);
+            color: white; position: fixed; height: 100%; overflow-y: auto;
+            border-right: 1px solid rgba(255,255,255,0.1); z-index: 100;
+        }
+        .sidebar .logo { padding: 30px 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar .logo i { font-size: 40px; color: var(--secondary); }
+        .sidebar .logo h2 { margin-top: 8px; font-size: 24px; }
+        .sidebar .logo p { font-size: 10px; opacity: 0.7; }
+        .sidebar .user-info { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 12px; }
+        .sidebar ul { list-style: none; margin-top: 20px; }
+        .sidebar li {
+            padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px;
+            margin: 4px 12px; border-radius: 12px; transition: all 0.3s;
+        }
+        .sidebar li:hover, .sidebar li.active { background: var(--secondary); color: var(--primary-dark); transform: translateX(5px); }
+        .main-content { margin-left: 280px; padding: 20px; min-height: 100vh; }
+        .top-bar {
+            background: var(--glass); backdrop-filter: blur(10px); padding: 15px 20px;
+            border-radius: 20px; display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+        }
+        .sync-status { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: var(--success); color: white; }
+        .sync-status.offline { background: var(--warning); color: #333; }
+        .theme-toggle { background: var(--primary); padding: 8px 16px; border-radius: 40px; cursor: pointer; font-size: 14px; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .active-page { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card {
+            background: var(--glass); backdrop-filter: blur(10px); border-radius: 20px;
+            padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: var(--glass); border-radius: 20px; padding: 18px; text-align: center; border-left: 4px solid var(--secondary); }
+        .stat-card h2 { font-size: 28px; margin: 8px 0; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; }
+        body.dark table { background: #1e293b; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f1f5f9; font-weight: 600; }
+        body.dark th { background: #0f172a; }
+        .profile-pic { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .btn, button { background: var(--primary); color: white; border: none; padding: 8px 18px; border-radius: 30px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .btn:hover, button:hover { background: var(--secondary); transform: scale(1.02); }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); color: #333; }
+        input, select, textarea { padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border); width: 100%; margin: 6px 0; font-size: 14px; background: white; }
+        body.dark input, body.dark select, body.dark textarea { background: #1e293b; color: white; border-color: #475569; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block; }
+        .badge-approved { background: #2a9d8f20; color: #2a9d8f; }
+        .badge-pending { background: #e9c46a20; color: #e9c46a; }
+        .badge-rejected { background: #e6394620; color: #e63946; }
+        .attendance-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .att-item { background: var(--light); padding: 12px; border-radius: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .employee-card { background: var(--light); padding: 12px; border-radius: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
+        .employee-card:hover { background: var(--secondary); color: white; transform: translateX(5px); }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--success); color: white; padding: 10px 20px; border-radius: 30px; z-index: 2000; animation: slideIn 0.3s ease; font-size: 14px; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1100; }
+        .modal-content { background: white; border-radius: 24px; padding: 25px; max-width: 600px; width: 90%; max-height: 80vh; overflow: auto; }
+        body.dark .modal-content { background: #1e293b; }
+        .contact-brand { text-align: center; margin-top: 20px; padding: 15px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 16px; color: white; }
+        .signature-line { margin-top: 30px; display: flex; justify-content: space-between; }
+        @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar span { display: none; } .main-content { margin-left: 70px; } }
+        
+        /* API Documentation Modal */
+        .api-doc { background: #1e1e2e; color: #fff; padding: 15px; border-radius: 12px; font-family: monospace; font-size: 12px; overflow-x: auto; }
+        .api-doc pre { background: #2d2d3d; padding: 10px; border-radius: 8px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+<div id="loginOverlay">
+    <div class="login-card">
+        <i class="fas fa-cloud-upload-alt" style="font-size: 55px; color: var(--secondary);"></i>
+        <h2>BizHR v2.0</h2>
+        <p>Cloud Ready Hotel HR Suite</p>
+        <input type="text" id="loginUser" placeholder="Username" value="admin">
+        <input type="password" id="loginPass" placeholder="Password" value="1234">
+        <div id="loginError" class="error"></div>
+        <button id="doLogin"><i class="fas fa-arrow-right"></i> Login</button>
+        <p style="margin-top: 15px; font-size: 11px; color: gray;">Demo: admin / 1234</p>
+    </div>
+</div>
+
+<div class="app" id="app">
+    <div class="sidebar">
+        <div class="logo"><i class="fas fa-cloud-upload-alt"></i><h2>BizHR</h2><p>Cloud Ready v2.0</p></div>
+        <div class="user-info" id="userInfo"><i class="fas fa-user-circle"></i> <span id="userName">Admin</span><br><small id="userRole">Administrator</small></div>
+        <ul>
+            <li data-page="dashboard" class="active"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></li>
+            <li data-page="attendance"><i class="fas fa-fingerprint"></i><span>Attendance</span></li>
+            <li data-page="leaveRequest"><i class="fas fa-calendar-alt"></i><span>Leave Request</span></li>
+            <li data-page="addEmployee"><i class="fas fa-user-plus"></i><span>Add Employee</span></li>
+            <li data-page="employeeDirectory"><i class="fas fa-address-book"></i><span>Employee Directory</span></li>
+            <li data-page="ledger"><i class="fas fa-book"></i><span>Salary Ledger</span></li>
+            <li data-page="shift"><i class="fas fa-clock"></i><span>Shift & Overtime</span></li>
+            <li data-page="expense"><i class="fas fa-money-bill-wave"></i><span>Expense</span></li>
+            <li data-page="terminatedEmployees"><i class="fas fa-user-slash"></i><span>Terminated</span></li>
+            <li data-page="notice"><i class="fas fa-bullhorn"></i><span>Notice Board</span></li>
+            <li data-page="departments"><i class="fas fa-building"></i><span>Departments</span></li>
+            <li data-page="companyProfile"><i class="fas fa-store"></i><span>Company Profile</span></li>
+            <li data-page="apiDocs"><i class="fas fa-code"></i><span>API Docs</span></li>
+            <li data-page="contact"><i class="fas fa-envelope"></i><span>Contact</span></li>
+            <li data-page="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="top-bar">
+            <h3 id="pageTitle">Dashboard</h3>
+            <div style="display: flex; gap: 10px;">
+                <div class="sync-status" id="syncStatus"><i class="fas fa-sync-alt"></i> Local Mode</div>
+                <div class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i> Dark Mode</div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardPage" class="page active-page">
+            <div class="stats-grid" id="dashboardStats"></div>
+            <div class="grid-2">
+                <div class="card"><canvas id="deptChart" height="150"></canvas></div>
+                <div class="card"><h4>Recent Leave Requests</h4><div id="recentLeavesList"></div></div>
+            </div>
+            <div class="card"><h4>Quick Actions</h4><button id="downloadDashboardPDF"><i class="fas fa-download"></i> PDF Report</button><button id="downloadDashboardExcel"><i class="fas fa-file-excel"></i> Excel Export</button><button id="syncNowBtn" class="btn-success"><i class="fas fa-cloud-upload-alt"></i> Sync to Cloud (Ready)</button></div>
+        </div>
+
+        <div id="attendancePage" class="page">
+            <div class="card">
+                <h3><i class="fas fa-clock"></i> Attendance with Check-In/Out Time</h3>
+                <select id="attDeptSelect"><option value="">-- Select Department --</option></select>
+                <div id="attendanceEmployeeList" class="attendance-grid"></div>
+                <button id="saveAttendanceBtn"><i class="fas fa-save"></i> Save Attendance</button>
+                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button id="downloadAttendanceSheetPDF" class="btn-success"><i class="fas fa-file-pdf"></i> Download Attendance Sheet</button>
+                    <select id="deptWiseReportSelect" style="width: auto;"><option value="">-- Dept Wise PDF --</option></select>
+                    <button id="downloadDeptWiseAttendancePDF"><i class="fas fa-building"></i> Dept Wise PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="leaveRequestPage" class="page">
+            <div class="grid-2">
+                <div class="card">
+                    <h3><i class="fas fa-paper-plane"></i> New Leave Request</h3>
+                    <select id="leaveEmployee"><option value="">Select Employee</option></select>
+                    <input type="date" id="leaveStartDate">
+                    <input type="date" id="leaveEndDate">
+                    <select id="leaveType"><option value="Sick">Sick Leave</option><option value="Casual">Casual Leave</option><option value="Annual">Annual Leave</option><option value="Emergency">Emergency</option></select>
+                    <textarea id="leaveReason" placeholder="Reason for leave" rows="2"></textarea>
+                    <button id="submitLeaveBtn"><i class="fas fa-paper-plane"></i> Submit Request</button>
+                </div>
+                <div class="card">
+                    <h3><i class="fas fa-tasks"></i> Pending Approvals</h3>
+                    <div id="pendingLeaveList"></div>
+                </div>
+            </div>
+            <div class="card"><h3>Leave History</h3><div id="leaveHistoryList"></div></div>
+        </div>
+
+        <div id="addEmployeePage" class="page">
+            <div class="card"><h3>New Employee Registration</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <input type="text" id="newName" placeholder="Full Name">
+                    <select id="newDept"></select>
+                    <input type="text" id="newPost" placeholder="Job Post">
+                    <input type="number" id="newSalary" placeholder="Monthly Salary">
+                    <input type="text" id="newPhone" placeholder="Phone Number">
+                    <input type="text" id="newBankAccount" placeholder="Bank Account Number">
+                    <input type="file" id="newPhoto" accept="image/*">
+                </div>
+                <textarea id="newAddress" placeholder="Address" rows="2"></textarea>
+                <button id="createEmployeeBtn"><i class="fas fa-id-card"></i> Create Employee (Auto ID)</button>
+            </div>
+        </div>
+
+        <div id="employeeDirectoryPage" class="page">
+            <div class="card">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                    <select id="dirDeptFilter" style="width: 180px;"><option value="">All Departments</option></select>
+                    <input type="text" id="dirSearch" placeholder="Search by name..." style="flex:1">
+                </div>
+                <div id="employeeDirectoryList"></div>
+            </div>
+        </div>
+
+        <div id="employeeProfilePage" class="page">
+            <div class="card" id="employeeProfileContainer"><p>Select an employee from Directory to view profile</p></div>
+        </div>
+
+        <div id="ledgerPage" class="page">
+            <div class="card"><h3>Salary Ledger (Advance + Payment + Overtime)</h3><div id="ledgerTableContainer"></div><button id="downloadLedgerPDF"><i class="fas fa-download"></i> Download Ledger PDF</button></div>
+        </div>
+
+        <div id="shiftPage" class="page">
+            <div class="card"><h3>Shift & Overtime Management</h3>
+                <select id="shiftEmployee"><option value="">Select Employee</option></select>
+                <select id="shiftType"><option value="Morning">Morning (8am-4pm)</option><option value="Evening">Evening (4pm-12am)</option><option value="Night">Night (12am-8am)</option></select>
+                <input type="number" id="overtimeHours" placeholder="Overtime Hours (This Month)" value="0">
+                <button id="saveShiftBtn">Save Shift & Overtime</button>
+                <div id="shiftListContainer" style="margin-top:15px;"></div>
+            </div>
+        </div>
+
+        <div id="expensePage" class="page">
+            <div class="grid-2">
+                <div class="card">
+                    <h3><i class="fas fa-plus-circle"></i> Add Expense</h3>
+                    <select id="expenseCategory"><option value="Food & Beverage">Food & Beverage</option><option value="Utilities">Utilities</option><option value="Maintenance">Maintenance</option><option value="Staff Welfare">Staff Welfare</option><option value="Marketing">Marketing</option><option value="Other">Other</option></select>
+                    <input type="text" id="expenseReason" placeholder="Expense Reason">
+                    <input type="number" id="expenseAmount" placeholder="Amount (BDT)">
+                    <select id="expenseDept"><option value="">All Departments</option></select>
+                    <button id="addExpenseBtn"><i class="fas fa-plus"></i> Add Expense</button>
+                </div>
+                <div class="card"><h3>Expense Summary</h3><div id="expenseSummary"></div></div>
+            </div>
+            <div class="card"><h3>Expense History</h3><div id="expenseList"></div><button id="downloadExpensePDF"><i class="fas fa-file-pdf"></i> Download Expense Report</button></div>
+        </div>
+
+        <div id="terminatedEmployeesPage" class="page">
+            <div class="card">
+                <h3>Terminate Employee</h3>
+                <select id="terminateEmployee"><option value="">Select Employee to Terminate</option></select>
+                <input type="date" id="terminationDate">
+                <select id="terminationReason"><option value="Resigned">Resigned</option><option value="Terminated">Terminated</option><option value="Retired">Retired</option><option value="Contract Ended">Contract Ended</option></select>
+                <textarea id="terminationNote" placeholder="Additional notes" rows="2"></textarea>
+                <button id="terminateEmployeeBtn" class="btn-danger"><i class="fas fa-user-slash"></i> Terminate Employee</button>
+            </div>
+            <div class="card"><h3>Terminated Employees (Data Preserved)</h3><div id="terminatedList"></div><button id="downloadTerminatedPDF" class="btn-sm"><i class="fas fa-file-pdf"></i> Download Terminated Report</button></div>
+        </div>
+
+        <div id="noticePage" class="page">
+            <div class="card"><h3>Notice Board</h3>
+                <input type="text" id="noticeTitle" placeholder="Notice Title">
+                <textarea id="noticeDesc" placeholder="Notice Description" rows="2"></textarea>
+                <button id="addNoticeBtn">Publish Notice</button>
+                <div id="noticeList" style="margin-top:15px;"></div>
+            </div>
+        </div>
+
+        <div id="departmentsPage" class="page">
+            <div class="card"><h3>Departments</h3><div style="display: flex; gap: 10px;"><input type="text" id="newDeptName" placeholder="New Department"><button id="addDeptBtn">Add</button></div><ul id="deptList" style="margin-top:15px;"></ul></div>
+        </div>
+
+        <div id="companyProfilePage" class="page">
+            <div class="card"><h3>Company Information</h3>
+                <input type="text" id="companyName" placeholder="Company Name">
+                <input type="text" id="companyPhone" placeholder="Phone">
+                <textarea id="companyAddress" placeholder="Address" rows="2"></textarea>
+                <input type="file" id="companyLogoUpload" accept="image/*">
+                <div id="logoPreview"></div>
+                <button id="saveCompanyProfileBtn">Save Profile</button>
+            </div>
+        </div>
+
+        <div id="apiDocsPage" class="page">
+            <div class="card">
+                <h3><i class="fas fa-code"></i> API Documentation - Backend Ready</h3>
+                <p>Below are the REST API endpoints prepared for backend integration. JWT authentication ready.</p>
+                <div class="api-doc">
+                    <h4>Base URL: <code>https://your-api.com/api/v1/</code></h4>
+                    <pre>
+// Authentication
+POST   /auth/login          - Login with username/password
+POST   /auth/register       - Register new user
+POST   /auth/logout         - Logout user
+GET    /auth/verify         - Verify token
+
+// Employees
+GET    /employees           - Get all employees
+GET    /employees/:id       - Get single employee
+POST   /employees           - Create employee
+PUT    /employees/:id       - Update employee
+DELETE /employees/:id       - Delete/terminate employee
+
+// Attendance
+GET    /attendance          - Get attendance records
+POST   /attendance          - Mark attendance
+PUT    /attendance/:id      - Update attendance
+
+// Leave
+GET    /leaves              - Get leave requests
+POST   /leaves              - Create leave request
+PUT    /leaves/:id/approve  - Approve leave
+PUT    /leaves/:id/reject   - Reject leave
+
+// Ledger
+GET    /ledger              - Get salary ledger
+PUT    /ledger/:id          - Update ledger (advance/paid)
+
+// Expenses
+GET    /expenses            - Get expenses
+POST   /expenses            - Add expense
+
+// Departments
+GET    /departments         - Get departments
+POST   /departments         - Add department
+DELETE /departments/:id     - Delete department
+
+// Notices
+GET    /notices             - Get notices
+POST   /notices             - Add notice
+
+// Reports
+GET    /reports/attendance  - Download attendance report
+GET    /reports/ledger      - Download ledger report
+                    </pre>
+                    <h4>Database Schema (MySQL/PostgreSQL Ready)</h4>
+                    <pre>
+-- Users table
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'manager', 'employee') DEFAULT 'employee',
+    employee_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Employees table
+CREATE TABLE employees (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    dept VARCHAR(50) NOT NULL,
+    post VARCHAR(50) NOT NULL,
+    salary DECIMAL(10,2) NOT NULL,
+    phone VARCHAR(20),
+    bank_account VARCHAR(50),
+    address TEXT,
+    photo TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Attendance table
+CREATE TABLE attendance (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    date DATE NOT NULL,
+    check_in_time TIME,
+    check_out_time TIME,
+    status ENUM('present', 'absent') DEFAULT 'absent',
+    FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
+
+-- Leave requests table
+CREATE TABLE leave_requests (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    type VARCHAR(30) NOT NULL,
+    reason TEXT,
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
+
+-- Salary ledger table
+CREATE TABLE salary_ledger (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    advance DECIMAL(10,2) DEFAULT 0,
+    paid DECIMAL(10,2) DEFAULT 0,
+    overtime_amount DECIMAL(10,2) DEFAULT 0,
+    month VARCHAR(7) NOT NULL,
+    FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
+
+-- Expenses table
+CREATE TABLE expenses (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    category VARCHAR(50) NOT NULL,
+    reason VARCHAR(255) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    dept VARCHAR(50),
+    date DATE NOT NULL
+);
+
+-- Shifts table
+CREATE TABLE shifts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    shift_type VARCHAR(20) NOT NULL,
+    overtime_hours DECIMAL(5,2) DEFAULT 0,
+    FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
+
+-- Notices table
+CREATE TABLE notices (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Terminated employees table
+CREATE TABLE terminated_employees (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT NOT NULL,
+    original_data JSON NOT NULL,
+    termination_date DATE NOT NULL,
+    reason VARCHAR(50) NOT NULL,
+    note TEXT,
+    terminated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+                    </pre>
+                </div>
+                <div class="contact-brand" style="margin-top: 20px;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 30px;"></i>
+                    <h3>Backend Integration Ready</h3>
+                    <p>JWT Token | CORS Enabled | REST API | Database Schema</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="contactPage" class="page">
+            <div class="card">
+                <h3><i class="fas fa-headset"></i> Contact Support</h3>
+                <p>For any issues or inquiries, please reach out to us:</p>
+                <ul style="margin-top: 15px; list-style: none;">
+                    <li><i class="fas fa-envelope"></i> Email: support@bizcore.com</li>
+                    <li><i class="fas fa-phone"></i> Phone: +880 1234 567890</li>
+                    <li><i class="fas fa-globe"></i> Website: www.bizcore.com</li>
+                    <li><i class="fas fa-map-marker-alt"></i> Address: Dhaka, Bangladesh</li>
+                </ul>
+                <div class="contact-brand">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 30px;"></i>
+                    <h3>BizHR v2.0</h3>
+                    <p>Powered by BizCore</p>
+                    <p><strong>“Your Vision, Our Software”</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== API SERVICE LAYER (READY FOR BACKEND) ====================
+    const API_CONFIG = {
+        baseURL: localStorage.getItem('api_base_url') || 'https://your-api.com/api/v1/',
+        token: localStorage.getItem('auth_token') || null,
+        isOnline: false, // Will be true when backend connected
+        offlineMode: true
+    };
+    
+    const APIService = {
+        setToken(token) {
+            API_CONFIG.token = token;
+            localStorage.setItem('auth_token', token);
+        },
+        
+        clearToken() {
+            API_CONFIG.token = null;
+            localStorage.removeItem('auth_token');
+        },
+        
+        async request(endpoint, method = 'GET', data = null) {
+            // If offline mode, use localStorage
+            if (API_CONFIG.offlineMode || !API_CONFIG.isOnline) {
+                return this.localRequest(endpoint, method, data);
+            }
+            
+            // Online mode - actual API call
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            if (API_CONFIG.token) {
+                headers['Authorization'] = `Bearer ${API_CONFIG.token}`;
+            }
+            
+            const options = {
+                method,
+                headers,
+            };
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(`${API_CONFIG.baseURL}${endpoint}`, options);
+                const result = await response.json();
+                return { success: response.ok, data: result };
+            } catch (error) {
+                console.error('API Error:', error);
+                // Fallback to local mode
+                return this.localRequest(endpoint, method, data);
+            }
+        },
+        
+        localRequest(endpoint, method, data) {
+            // Local storage based operations (current implementation)
+            // This is a wrapper for existing localStorage functions
+            return { success: true, data: null, local: true };
+        },
+        
+        async syncAllData() {
+            showToast('Sync to cloud feature ready. Configure API base URL to enable.');
+            return { success: false };
+        }
+    };
+    
+    // ==================== AUTHENTICATION ====================
+    const Auth = {
+        currentUser: null,
+        
+        login(username, password) {
+            // Demo credentials
+            if (username === 'admin' && password === '1234') {
+                this.currentUser = { id: 1, username: 'admin', role: 'admin', name: 'Administrator' };
+                const token = btoa(JSON.stringify({ id: 1, username: 'admin', exp: Date.now() + 86400000 }));
+                APIService.setToken(token);
+                localStorage.setItem('bizhr_user', JSON.stringify(this.currentUser));
+                return true;
+            }
+            return false;
+        },
+        
+        logout() {
+            this.currentUser = null;
+            APIService.clearToken();
+            localStorage.removeItem('bizhr_user');
+        },
+        
+        isLoggedIn() {
+            const user = localStorage.getItem('bizhr_user');
+            if (user) {
+                this.currentUser = JSON.parse(user);
+                return true;
+            }
+            return false;
+        },
+        
+        getUser() {
+            return this.currentUser;
+        }
+    };
+    
+    // ==================== DATA MODELS ====================
+    let employees = [];
+    let departments = ["Housekeeping", "Front Desk", "Kitchen", "Management"];
+    let attendanceLog = [];
+    let leaveRequests = [];
+    let terminatedEmployees = [];
+    let expenses = [];
+    let salaryLedger = [];
+    let shifts = [];
+    let notices = [];
+    let company = { name: "BizHR Enterprise", phone: "+880 1234 567890", address: "Dhaka, Bangladesh", logo: "" };
+    let nextLeaveId = 1;
+    let nextExpenseId = 1;
+    
+    function showToast(msg) { let t=document.createElement('div'); t.className='toast'; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2000); }
+    function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+    function getCurrentMonth() { return new Date().toISOString().slice(0,7); }
+    
+    function saveAll() {
+        localStorage.setItem("bizhr_employees", JSON.stringify(employees));
+        localStorage.setItem("bizhr_depts", JSON.stringify(departments));
+        localStorage.setItem("bizhr_att", JSON.stringify(attendanceLog));
+        localStorage.setItem("bizhr_leaves", JSON.stringify(leaveRequests));
+        localStorage.setItem("bizhr_terminated", JSON.stringify(terminatedEmployees));
+        localStorage.setItem("bizhr_expenses", JSON.stringify(expenses));
+        localStorage.setItem("bizhr_ledger", JSON.stringify(salaryLedger));
+        localStorage.setItem("bizhr_shifts", JSON.stringify(shifts));
+        localStorage.setItem("bizhr_notices", JSON.stringify(notices));
+        localStorage.setItem("bizhr_company", JSON.stringify(company));
+        localStorage.setItem("bizhr_nextLeaveId", nextLeaveId);
+        localStorage.setItem("bizhr_nextExpenseId", nextExpenseId);
+    }
+    
+    function loadData() {
+        if(localStorage.getItem("bizhr_employees")) employees = JSON.parse(localStorage.getItem("bizhr_employees"));
+        else employees = [{ id: 1001, name: "Rahim Uddin", dept: "Front Desk", post: "Manager", salary: 45000, phone: "01712345678", bankAccount: "1234567890", address: "Dhaka", photo: "", isActive: true }];
+        if(localStorage.getItem("bizhr_depts")) departments = JSON.parse(localStorage.getItem("bizhr_depts"));
+        if(localStorage.getItem("bizhr_att")) attendanceLog = JSON.parse(localStorage.getItem("bizhr_att"));
+        if(localStorage.getItem("bizhr_leaves")) leaveRequests = JSON.parse(localStorage.getItem("bizhr_leaves"));
+        if(localStorage.getItem("bizhr_terminated")) terminatedEmployees = JSON.parse(localStorage.getItem("bizhr_terminated"));
+        if(localStorage.getItem("bizhr_expenses")) expenses = JSON.parse(localStorage.getItem("bizhr_expenses"));
+        if(localStorage.getItem("bizhr_ledger")) salaryLedger = JSON.parse(localStorage.getItem("bizhr_ledger"));
+        if(localStorage.getItem("bizhr_shifts")) shifts = JSON.parse(localStorage.getItem("bizhr_shifts"));
+        if(localStorage.getItem("bizhr_notices")) notices = JSON.parse(localStorage.getItem("bizhr_notices"));
+        if(localStorage.getItem("bizhr_company")) company = JSON.parse(localStorage.getItem("bizhr_company"));
+        if(localStorage.getItem("bizhr_nextLeaveId")) nextLeaveId = parseInt(localStorage.getItem("bizhr_nextLeaveId"));
+        if(localStorage.getItem("bizhr_nextExpenseId")) nextExpenseId = parseInt(localStorage.getItem("bizhr_nextExpenseId"));
+        
+        employees = employees.filter(e => !terminatedEmployees.some(s => s.empId === e.id));
+        employees.forEach(e => { if(e.isActive === undefined) e.isActive = true; });
+        
+        if(!salaryLedger.length) employees.forEach(e=>salaryLedger.push({ empId: e.id, advance: 0, paid: 0, overtimeAmount: 0, month: getCurrentMonth() }));
+    }
+    
+    // ==================== RENDER FUNCTIONS (Same as before - kept intact) ====================
+    function renderDashboard() {
+        let active = employees.length;
+        let today = getTodayStr();
+        let presentToday = attendanceLog.filter(a=>a.date===today && a.status==='present').length;
+        let totalSalary = employees.reduce((s,e)=>s+e.salary,0);
+        let pendingLeaves = leaveRequests.filter(l=>l.status==='pending').length;
+        let totalExpenses = expenses.reduce((s,e)=>s+e.amount,0);
+        
+        document.getElementById("dashboardStats").innerHTML = `
+            <div class="stat-card"><i class="fas fa-users"></i><h2>${active}</h2><p>Active Staff</p></div>
+            <div class="stat-card"><i class="fas fa-clock"></i><h2>${presentToday}</h2><p>Present Today</p></div>
+            <div class="stat-card"><i class="fas fa-dollar-sign"></i><h2>${totalSalary.toLocaleString()} BDT</h2><p>Salary Pool</p></div>
+            <div class="stat-card"><i class="fas fa-calendar-alt"></i><h2>${pendingLeaves}</h2><p>Pending Leaves</p></div>
+            <div class="stat-card"><i class="fas fa-money-bill"></i><h2>${totalExpenses.toLocaleString()} BDT</h2><p>Total Expenses</p></div>
+        `;
+        
+        let deptPresent = {};
+        departments.forEach(d=>deptPresent[d]=0);
+        attendanceLog.filter(a=>a.date===today && a.status==='present').forEach(att=>{
+            let emp = employees.find(e=>e.id===att.empId);
+            if(emp && deptPresent[emp.dept]!==undefined) deptPresent[emp.dept]++;
+        });
+        let ctx = document.getElementById('deptChart').getContext('2d');
+        if(window.deptChartInstance) window.deptChartInstance.destroy();
+        window.deptChartInstance = new Chart(ctx, { type: 'bar', data: { labels: departments, datasets: [{ label: 'Present Today', data: departments.map(d=>deptPresent[d]), backgroundColor: '#f4a261', borderRadius: 8 }] } });
+        
+        let recentLeaves = leaveRequests.filter(l=>l.status==='pending').slice(0,5);
+        let recentHtml = recentLeaves.length ? recentLeaves.map(l=>{
+            let emp = employees.find(e=>e.id===l.empId);
+            return `<div style="padding:8px; border-bottom:1px solid var(--border);"><strong>${emp?.name || 'Unknown'}</strong> - ${l.type}<br><small>${l.startDate} to ${l.endDate}</small><br><span class="badge badge-pending">Pending</span></div>`;
+        }).join('') : '<p>No pending leaves</p>';
+        document.getElementById("recentLeavesList").innerHTML = recentHtml;
+    }
+    
+    function renderDeptOptions() {
+        let activeEmployees = employees.filter(e=>e.isActive !== false);
+        document.getElementById("newDept") && (document.getElementById("newDept").innerHTML = departments.map(d=>`<option value="${d}">${d}</option>`).join(''));
+        document.getElementById("attDeptSelect") && (document.getElementById("attDeptSelect").innerHTML = '<option value="">--Select Department--</option>'+departments.map(d=>`<option value="${d}">${d}</option>`).join(''));
+        document.getElementById("shiftEmployee") && (document.getElementById("shiftEmployee").innerHTML = '<option value="">Select</option>'+activeEmployees.map(e=>`<option value="${e.id}">${e.name}</option>`).join(''));
+        document.getElementById("dirDeptFilter") && (document.getElementById("dirDeptFilter").innerHTML = '<option value="">All Departments</option>'+departments.map(d=>`<option value="${d}">${d}</option>`).join(''));
+        document.getElementById("deptWiseReportSelect") && (document.getElementById("deptWiseReportSelect").innerHTML = '<option value="">Select Department</option>'+departments.map(d=>`<option value="${d}">${d}</option>`).join(''));
+        document.getElementById("leaveEmployee") && (document.getElementById("leaveEmployee").innerHTML = '<option value="">Select Employee</option>'+activeEmployees.map(e=>`<option value="${e.id}">${e.name} (${e.dept})</option>`).join(''));
+        document.getElementById("terminateEmployee") && (document.getElementById("terminateEmployee").innerHTML = '<option value="">Select Employee</option>'+activeEmployees.map(e=>`<option value="${e.id}">${e.name} (${e.dept})</option>`).join(''));
+        document.getElementById("expenseDept") && (document.getElementById("expenseDept").innerHTML = '<option value="">All Departments</option>'+departments.map(d=>`<option value="${d}">${d}</option>`).join(''));
+    }
+    
+    // Attendance functions
+    function renderAttendanceUI() {
+        let dept = document.getElementById("attDeptSelect").value;
+        if(!dept) { document.getElementById("attendanceEmployeeList").innerHTML = "<p>Select a department</p>"; return; }
+        let empList = employees.filter(e=>e.dept===dept && e.isActive !== false);
+        let today = getTodayStr();
+        let html = '';
+        empList.forEach(emp=>{
+            let record = attendanceLog.find(a=>a.empId===emp.id && a.date===today);
+            let isPresent = record && record.status==='present';
+            let checkInTime = record?.checkInTime || '';
+            let checkOutTime = record?.checkOutTime || '';
+            html += `<div class="att-item">
+                        <img src="${emp.photo || 'https://via.placeholder.com/40'}" class="profile-pic" style="width:40px;height:40px;">
+                        <div style="flex:1;"><strong>${emp.name}</strong><br><small>${emp.post} | ID: ${emp.id}</small></div>
+                        <div style="width:120px;"><input type="time" class="checkInTime" data-id="${emp.id}" value="${checkInTime}" style="width:100%;"></div>
+                        <div style="width:120px;"><input type="time" class="checkOutTime" data-id="${emp.id}" value="${checkOutTime}" style="width:100%;"></div>
+                        <div><input type="checkbox" class="attCheckbox" data-id="${emp.id}" ${isPresent ? 'checked' : ''} style="width:20px;height:20px;"></div>
+                    </div>`;
+        });
+        document.getElementById("attendanceEmployeeList").innerHTML = html;
+    }
+    
+    function saveAttendance() {
+        let today = getTodayStr();
+        document.querySelectorAll('.attCheckbox').forEach(cb=>{
+            let empId = parseInt(cb.dataset.id);
+            let checkInTime = document.querySelector(`.checkInTime[data-id="${empId}"]`)?.value || '';
+            let checkOutTime = document.querySelector(`.checkOutTime[data-id="${empId}"]`)?.value || '';
+            let existing = attendanceLog.findIndex(a=>a.empId===empId && a.date===today);
+            if(cb.checked) {
+                if(existing===-1) attendanceLog.push({ empId, date: today, checkInTime, checkOutTime, status: 'present' });
+                else { attendanceLog[existing].status = 'present'; attendanceLog[existing].checkInTime = checkInTime; attendanceLog[existing].checkOutTime = checkOutTime; }
+            } else {
+                if(existing!==-1) attendanceLog.splice(existing,1);
+            }
+        });
+        saveAll();
+        showToast("Attendance saved!");
+        renderDashboard();
+    }
+    
+    // Leave functions
+    function submitLeaveRequest() {
+        let empId = parseInt(document.getElementById("leaveEmployee").value);
+        let startDate = document.getElementById("leaveStartDate").value;
+        let endDate = document.getElementById("leaveEndDate").value;
+        let type = document.getElementById("leaveType").value;
+        let reason = document.getElementById("leaveReason").value;
+        if(!empId || !startDate || !endDate) { alert("Please fill all fields"); return; }
+        leaveRequests.push({ id: nextLeaveId++, empId, startDate, endDate, type, reason, status: 'pending', createdAt: getTodayStr() });
+        saveAll();
+        showToast("Leave request submitted!");
+        renderLeaveRequests();
+        document.getElementById("leaveReason").value = "";
+    }
+    
+    function renderLeaveRequests() {
+        let pendingHtml = '<table style="width:100%; border:1px solid #ddd; border-collapse:collapse;"><thead><tr style="background:#f4a261;"><th>Employee</th><th>Type</th><th>Dates</th><th>Reason</th><th>Actions</th></tr></thead><tbody>';
+        let historyHtml = '<table style="width:100%; border:1px solid #ddd; border-collapse:collapse;"><thead><tr style="background:#f4a261;"><th>Employee</th><th>Type</th><th>Dates</th><th>Status</th></tr></thead><tbody>';
+        
+        leaveRequests.forEach(req => {
+            let emp = employees.find(e=>e.id===req.empId);
+            let empName = emp?.name || 'Unknown';
+            if(req.status === 'pending') {
+                pendingHtml += `<tr><td style="padding:8px; border:1px solid #ddd;">${empName}</td><td style="padding:8px; border:1px solid #ddd;">${req.type}</td><td style="padding:8px; border:1px solid #ddd;">${req.startDate} to ${req.endDate}</td><td style="padding:8px; border:1px solid #ddd;">${req.reason}</td><td style="padding:8px; border:1px solid #ddd;"><button class="btn-sm approveLeave" data-id="${req.id}">Approve</button> <button class="btn-sm btn-danger rejectLeave" data-id="${req.id}">Reject</button></td></tr>`;
+            } else {
+                let statusClass = req.status==='approved' ? 'badge-approved' : 'badge-rejected';
+                historyHtml += `<tr><td style="padding:8px; border:1px solid #ddd;">${empName}</td><td style="padding:8px; border:1px solid #ddd;">${req.type}</td><td style="padding:8px; border:1px solid #ddd;">${req.startDate} to ${req.endDate}</td><td style="padding:8px; border:1px solid #ddd;"><span class="badge ${statusClass}">${req.status}</span></td></tr>`;
+            }
+        });
+        pendingHtml += '</tbody></table>';
+        historyHtml += '</tbody></table>';
+        document.getElementById("pendingLeaveList").innerHTML = pendingHtml || '<p>No pending requests</p>';
+        document.getElementById("leaveHistoryList").innerHTML = historyHtml || '<p>No leave history</p>';
+        
+        document.querySelectorAll('.approveLeave').forEach(btn=>btn.addEventListener('click',()=>{
+            let id = parseInt(btn.dataset.id);
+            let req = leaveRequests.find(r=>r.id===id);
+            if(req) req.status = 'approved';
+            saveAll(); renderLeaveRequests(); renderDashboard();
+            showToast("Leave approved");
+        }));
+        document.querySelectorAll('.rejectLeave').forEach(btn=>btn.addEventListener('click',()=>{
+            let id = parseInt(btn.dataset.id);
+            let req = leaveRequests.find(r=>r.id===id);
+            if(req) req.status = 'rejected';
+            saveAll(); renderLeaveRequests();
+            showToast("Leave rejected");
+        }));
+    }
+    
+    // Employee functions
+    function generateEmployeeId() { let max = employees.reduce((m,e)=>Math.max(m,e.id),1000); return max+1; }
+    
+    function addEmployee() {
+        let name = document.getElementById("newName").value;
+        let dept = document.getElementById("newDept").value;
+        let post = document.getElementById("newPost").value;
+        let salary = parseInt(document.getElementById("newSalary").value);
+        let phone = document.getElementById("newPhone").value;
+        let bankAccount = document.getElementById("newBankAccount").value;
+        let address = document.getElementById("newAddress").value;
+        let photoFile = document.getElementById("newPhoto").files[0];
+        if(!name || !dept || !post) { alert("Fill required fields"); return; }
+        let photoUrl = photoFile ? URL.createObjectURL(photoFile) : "";
+        let newId = generateEmployeeId();
+        employees.push({ id: newId, name, dept, post, salary, phone, bankAccount, address, photo: photoUrl, isActive: true });
+        salaryLedger.push({ empId: newId, advance: 0, paid: 0, overtimeAmount: 0, month: getCurrentMonth() });
+        saveAll();
+        showToast(`Employee added. ID: ${newId}`);
+        document.getElementById("newName").value=""; document.getElementById("newPost").value=""; document.getElementById("newSalary").value="";
+        renderEmployeeDirectory(); renderDashboard(); renderDeptOptions(); renderLedger(); renderShiftList();
+    }
+    
+    function renderEmployeeDirectory() {
+        let dept = document.getElementById("dirDeptFilter").value;
+        let search = document.getElementById("dirSearch")?.value.toLowerCase() || "";
+        let filtered = employees.filter(e => e.isActive !== false && (dept==="" || e.dept===dept) && e.name.toLowerCase().includes(search));
+        let html = '';
+        filtered.forEach(emp => {
+            html += `<div class="employee-card" onclick="viewEmployeeProfile(${emp.id})">
+                        <img src="${emp.photo || 'https://via.placeholder.com/45'}" class="profile-pic" style="width:45px;height:45px;">
+                        <div><strong>${emp.name}</strong><br><small>${emp.dept} | ${emp.post}</small><br><small>ID: ${emp.id}</small></div>
+                    </div>`;
+        });
+        document.getElementById("employeeDirectoryList").innerHTML = html || '<p>No employees found</p>';
+    }
+    
+    window.viewEmployeeProfile = function(empId) { 
+        if(document.getElementById("employeeProfilePage")) {
+            showPage('employeeProfile');
+            renderEmployeeProfile(empId);
+        }
+    };
+    
+    function renderEmployeeProfile(empId) {
+        let emp = employees.find(e=>e.id===empId);
+        if(!emp) return;
+        let monthAtt = attendanceLog.filter(a=>a.empId===emp.id && a.date.startsWith(getCurrentMonth()) && a.status==='present').length;
+        let shiftData = shifts.find(s=>s.empId===emp.id) || { shift: 'Not Assigned', overtime: 0 };
+        let ledger = salaryLedger.find(l=>l.empId===emp.id) || { advance: 0, paid: 0, overtimeAmount: 0 };
+        let balance = emp.salary + (ledger.overtimeAmount || 0) - ledger.advance - ledger.paid;
+        
+        let html = `<div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap; margin-bottom:20px;">
+            <img src="${emp.photo || 'https://via.placeholder.com/100'}" style="width:100px;height:100px;border-radius:50%;">
+            <div><h2>${emp.name}</h2><p>ID: ${emp.id} | ${emp.dept} | ${emp.post}</p></div>
+            <button id="editProfileMainBtn" class="btn-warning"><i class="fas fa-edit"></i> Edit Profile</button>
+            <button id="downloadProfilePDF" class="btn-success"><i class="fas fa-download"></i> PDF</button>
+        </div>
+        <div id="profileViewMode">
+            <table style="width:100%; border:1px solid #ddd; border-collapse:collapse;">
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Phone</strong></td><td style="padding:8px; border:1px solid #ddd;">${emp.phone || 'N/A'}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Bank Account</strong></td><td style="padding:8px; border:1px solid #ddd;">${emp.bankAccount || 'N/A'}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Address</strong></td><td style="padding:8px; border:1px solid #ddd;">${emp.address || 'N/A'}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Salary</strong></td><td style="padding:8px; border:1px solid #ddd;">${emp.salary.toLocaleString()} BDT</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Shift</strong></td><td style="padding:8px; border:1px solid #ddd;">${shiftData.shift}</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Overtime Hours</strong></td><td style="padding:8px; border:1px solid #ddd;">${shiftData.overtime || 0} hrs</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Overtime Amount</strong></td><td style="padding:8px; border:1px solid #ddd;">${(ledger.overtimeAmount || 0).toLocaleString()} BDT</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Advance Taken</strong></td><td style="padding:8px; border:1px solid #ddd;">${ledger.advance.toLocaleString()} BDT</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Paid This Month</strong></td><td style="padding:8px; border:1px solid #ddd;">${ledger.paid.toLocaleString()} BDT</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Balance</strong></td><td style="padding:8px; border:1px solid #ddd;">${balance.toLocaleString()} BDT</td></tr>
+                <tr><td style="padding:8px; border:1px solid #ddd;"><strong>Attendance (This Month)</strong></td><td style="padding:8px; border:1px solid #ddd;">${monthAtt} days</td></tr>
+            </table>
+        </div>
+        <div id="profileEditMode" style="display:none; margin-top:20px;">
+            <input type="text" id="editName" value="${emp.name}">
+            <select id="editDept">${departments.map(d=>`<option ${d===emp.dept?'selected':''}>${d}</option>`).join('')}</select>
+            <input type="text" id="editPost" value="${emp.post}">
+            <input type="number" id="editSalary" value="${emp.salary}">
+            <input type="text" id="editPhone" value="${emp.phone || ''}">
+            <input type="text" id="editBankAccount" value="${emp.bankAccount || ''}">
+            <textarea id="editAddress">${emp.address || ''}</textarea>
+            <input type="file" id="editPhoto" accept="image/*">
+            <button id="saveProfileEditBtn" class="btn-success">Save Changes</button>
+            <button id="cancelEditBtn">Cancel</button>
+        </div>`;
+        document.getElementById("employeeProfileContainer").innerHTML = html;
+        
+        document.getElementById("editProfileMainBtn")?.addEventListener('click',()=>{
+            document.getElementById("profileViewMode").style.display = "none";
+            document.getElementById("profileEditMode").style.display = "block";
+        });
+        document.getElementById("cancelEditBtn")?.addEventListener('click',()=>{
+            document.getElementById("profileViewMode").style.display = "block";
+            document.getElementById("profileEditMode").style.display = "none";
+        });
+        document.getElementById("saveProfileEditBtn")?.addEventListener('click',()=>{
+            let photoFile = document.getElementById("editPhoto").files[0];
+            if(photoFile) emp.photo = URL.createObjectURL(photoFile);
+            emp.name = document.getElementById("editName").value;
+            emp.dept = document.getElementById("editDept").value;
+            emp.post = document.getElementById("editPost").value;
+            emp.salary = parseInt(document.getElementById("editSalary").value);
+            emp.phone = document.getElementById("editPhone").value;
+            emp.bankAccount = document.getElementById("editBankAccount").value;
+            emp.address = document.getElementById("editAddress").value;
+            saveAll();
+            showToast("Profile updated!");
+            renderEmployeeProfile(emp.id);
+            renderEmployeeDirectory();
+            renderDashboard();
+        });
+        document.getElementById("downloadProfilePDF")?.addEventListener('click',()=>generateEmployeeProfilePDF(emp));
+    }
+    
+    // Ledger functions
+    function renderLedger() {
+        let html = '<table style="width:100%; border:1px solid #ddd; border-collapse:collapse;"><thead><tr style="background:#f4a261;"><th>ID</th><th>Name</th><th>Dept</th><th>Salary</th><th>Overtime Amt</th><th>Advance</th><th>Paid</th><th>Balance</th><th>Actions</th></tr></thead><tbody>';
+        employees.forEach(emp=>{
+            let ledger = salaryLedger.find(l=>l.empId===emp.id) || { advance:0, paid:0, overtimeAmount:0 };
+            let shiftData = shifts.find(s=>s.empId===emp.id) || { overtime:0 };
+            let overtimeAmount = Math.round((shiftData.overtime || 0) * (emp.salary / 30 / 8));
+            if(ledger.overtimeAmount !== overtimeAmount) {
+                ledger.overtimeAmount = overtimeAmount;
+                saveAll();
+            }
+            let balance = emp.salary + (ledger.overtimeAmount || 0) - ledger.advance - ledger.paid;
+            html += `<tr>
+                        <td style="padding:8px; border:1px solid #ddd;">${emp.id}</td>
+                        <td style="padding:8px; border:1px solid #ddd;">${emp.name}</td>
+                        <td style="padding:8px; border:1px solid #ddd;">${emp.dept}</td>
+                        <td style="padding:8px; border:1px solid #ddd;">${emp.salary.toLocaleString()}</td>
+                        <td style="padding:8px; border:1px solid #ddd;">${(ledger.overtimeAmount || 0).toLocaleString()} BDT</td>
+                        <td style="padding:8px; border:1px solid #ddd;"><input type="number" class="advanceInput" data-id="${emp.id}" value="${ledger.advance}" style="width:90px;"></td>
+                        <td style="padding:8px; border:1px solid #ddd;"><input type="number" class="paidInput" data-id="${emp.id}" value="${ledger.paid}" style="width:90px;"></td>
+                        <td class="balance" style="padding:8px; border:1px solid #ddd;">${balance.toLocaleString()} BDT</td>
+                        <td style="padding:8px; border:1px solid #ddd;"><button class="btn-sm updateLedgerBtn" data-id="${emp.id}">Update</button></td>
+                      </tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById("ledgerTableContainer").innerHTML = html;
+        document.querySelectorAll('.updateLedgerBtn').forEach(btn=>btn.addEventListener('click',()=>{
+            let id = parseInt(btn.dataset.id);
+            let advance = parseFloat(document.querySelector(`.advanceInput[data-id="${id}"]`).value) || 0;
+            let paid = parseFloat(document.querySelector(`.paidInput[data-id="${id}"]`).value) || 0;
+            let idx = salaryLedger.findIndex(l=>l.empId===id);
+            if(idx>=0) { salaryLedger[idx].advance = advance; salaryLedger[idx].paid = paid; }
+            else salaryLedger.push({ empId: id, advance, paid, overtimeAmount:0, month: getCurrentMonth() });
+            saveAll(); renderLedger(); showToast("Ledger updated");
+        }));
+    }
+    
+    // Shift functions
+    function renderShiftList() {
+        let html = '<table style="width:100%; border:1px solid #ddd; border-collapse:collapse;"><thead><tr style="background:#f4a261;"><th>Employee</th><th>Shift</th><th>Overtime (hrs)</th><th>Overtime Amount</th></tr></thead><tbody>';
+        employees.forEach(emp=>{
+            let s = shifts.find(sh=>sh.empId===emp.id) || { shift: 'Not Set', overtime: 0 };
+            let otAmount = Math.round(s.overtime * (emp.salary / 30 / 8));
+            html += `<tr><td style="padding:8px; border:1px solid #ddd;">${emp.name}</td><td style="padding:8px; border:1px solid #ddd;">${s.shift}</td><td style="padding:8px; border:1px solid #ddd;">${s.overtime}</td><td style="padding:8px; border:1px solid #ddd;">${otAmount.toLocaleString()} BDT</td></tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById("shiftListContainer").innerHTML = html;
+    }
+    
+    // Expense functions
+    function addExpense() {
+        let category = document.getElementById("expenseCategory").value;
+        let reason = document.getElementById("expenseReason").value;
+        let amount = parseFloat(document.getElementById("expenseAmount").value);
+        let dept = document.getElementById("expenseDept").value;
+        if(!reason || !amount) { alert("Fill reason and amount"); return; }
+        expenses.push({ id: nextExpenseId++, category, reason, amount, dept, date: getTodayStr() });
+        saveAll();
+        showToast("Expense added");
+        renderExpenses();
+        document.getElementById("expenseReason").value = "";
+        document.getElementById("expenseAmount").value = "";
+    }
+    
+    function renderExpenses() {
+        let total = expenses.reduce((s,e)=>s+e.amount,0);
+        let deptTotal = {};
+        expenses.forEach(e => { if(e.dept) deptTotal[e.dept] = (deptTotal[e.dept]||0)+e.amount; });
+        let summaryHtml = `<p><strong>Total Expenses:</strong> ${total.toLocaleString()} BDT</p><h4>By Department:</h4><ul>`;
+        for(let d in deptTotal) summaryHtml += `<li>${d}: ${deptTotal[d].toLocaleString()} BDT</li>`;
+        summaryHtml += '</ul>';
+        document.getElementById("expenseSummary").innerHTML = summaryHtml;
+        
+        let listHtml = '<table style="width:100%; border:1px solid #ddd; border-collapse:collapse;"><thead><tr style="background:#f4a261;"><th>Date</th><th>Category</th><th>Reason</th><th>Dept</th><th>Amount</th></tr></thead><tbody>';
+        expenses.slice().reverse().forEach(e => {
+            listHtml += `<tr><td style="padding:8px; border:1px solid #ddd;">${e.date}</td><td style="padding:8px; border:1px solid #ddd;">${e.category}</td><td style="padding:8px; border:1px solid #ddd;">${e.reason}</td><td style="padding:8px; border:1px solid #ddd;">${e.dept || 'N/A'}</td><td style="padding:8px; border:1px solid #ddd;">${e.amount.toLocaleString()} BDT</td></tr>`;
+        });
+        listHtml += '</tbody></table>';
+        document.getElementById("expenseList").innerHTML = listHtml;
+    }
+    
+    // Termination functions
+    function terminateEmployee() {
+        let empId = parseInt(document.getElementById("terminateEmployee").value);
+        let terminationDate = document.getElementById("terminationDate").value;
+        let reason = document.getElementById("terminationReason").value;
+        let note = document.getElementById("terminationNote").value;
+        if(!empId || !terminationDate) { alert("Select employee and date"); return; }
+        let emp = employees.find(e=>e.id===empId);
+        if(!emp) return;
+        terminatedEmployees.push({ empId, terminationDate, reason, note, originalData: {...emp}, terminatedAt: getTodayStr() });
+        employees = employees.filter(e=>e.id!==empId);
+        saveAll();
+        showToast(`${emp.name} has been terminated. Data preserved.`);
+        renderTerminatedList();
+        renderDeptOptions();
+        renderDashboard();
+        document.getElementById("terminationNote").value = "";
+    }
+    
+    function renderTerminatedList() {
+        let html = '<table style="width:100%; border:1px solid #ddd; border-collapse:collapse;"><thead><tr style="background:#f4a261;"><th>ID</th><th>Name</th><th>Department</th><th>Termination Date</th><th>Reason</th></tr></thead><tbody>';
+        terminatedEmployees.forEach(term => {
+            html += `<tr><td style="padding:8px; border:1px solid #ddd;">${term.originalData.id}</td><td style="padding:8px; border:1px solid #ddd;">${term.originalData.name}</td><td style="padding:8px; border:1px solid #ddd;">${term.originalData.dept}</td><td style="padding:8px; border:1px solid #ddd;">${term.terminationDate}</td><td style="padding:8px; border:1px solid #ddd;">${term.reason}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById("terminatedList").innerHTML = html || '<p>No terminated employees</p>';
+    }
+    
+    // Notice functions
+    function renderNotices() {
+        let html = '<ul style="list-style:none;">';
+        notices.slice().reverse().forEach(n=>{ html += `<li style="background:var(--light); margin:8px 0; padding:12px; border-radius:12px;"><strong>${n.title}</strong><br><small>${n.date}</small><p>${n.desc}</p></li>`; });
+        html += '</ul>';
+        document.getElementById("noticeList").innerHTML = html;
+    }
+    
+    // Department functions
+    function renderDeptList() {
+        let html = '<ul style="list-style:none;">';
+        departments.forEach(d=>html+=`<li style="padding:8px; background:#f1f5f9; margin:5px; border-radius:10px; display:flex; justify-content:space-between;">${d} <button class="btn-sm deleteDeptBtn" data-dept="${d}">Remove</button></li>`);
+        html+='</ul>';
+        document.getElementById("deptList").innerHTML = html;
+        document.querySelectorAll('.deleteDeptBtn').forEach(btn=>btn.addEventListener('click',()=>{
+            let deptName = btn.dataset.dept;
+            if(confirm(`Delete ${deptName}?`)) {
+                employees.forEach(e=>{ if(e.dept===deptName) e.dept="Other"; });
+                departments = departments.filter(d=>d!==deptName);
+                if(!departments.includes("Other")) departments.push("Other");
+                saveAll(); renderDeptOptions(); renderDeptList(); renderEmployeeDirectory(); renderDashboard();
+            }
+        }));
+    }
+    
+    // Company Profile functions
+    function loadCompanyProfile() {
+        document.getElementById("companyName").value = company.name;
+        document.getElementById("companyPhone").value = company.phone;
+        document.getElementById("companyAddress").value = company.address;
+        if(company.logo) document.getElementById("logoPreview").innerHTML = `<img src="${company.logo}" style="width:70px;">`;
+    }
+    function saveCompanyProfile() {
+        company.name = document.getElementById("companyName").value;
+        company.phone = document.getElementById("companyPhone").value;
+        company.address = document.getElementById("companyAddress").value;
+        let logoFile = document.getElementById("companyLogoUpload").files[0];
+        if(logoFile) company.logo = URL.createObjectURL(logoFile);
+        saveAll(); showToast("Profile Saved!");
+    }
+    
+    // PDF Functions
+    async function generateProfessionalPDF(elementId, filename, title) {
+        let element = document.getElementById(elementId).cloneNode(true);
+        let logoHtml = company.logo ? `<img src="${company.logo}" style="height:60px; margin-bottom:10px;">` : '';
+        let dateStr = new Date().toLocaleString();
+        let wrapper = document.createElement('div');
+        wrapper.style.padding = "30px";
+        wrapper.style.fontFamily = "Inter, sans-serif";
+        wrapper.style.background = "white";
+        wrapper.style.borderRadius = "12px";
+        wrapper.innerHTML = `
+            <div style="text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 3px solid #f4a261;">
+                ${logoHtml}
+                <h1 style="color: #1a4a6f; margin: 10px 0 5px;">${company.name}</h1>
+                <p style="color: #64748b; margin: 0;">${company.address} | Phone: ${company.phone}</p>
+                <p style="color: #94a3b8; font-size: 11px; margin-top: 8px;">Report Generated: ${dateStr}</p>
+            </div>
+            <div style="margin-bottom: 20px;"><h2 style="color: #f4a261; border-left: 4px solid #f4a261; padding-left: 15px;">${title}</h2></div>
+            <div style="background: white; padding: 15px; border-radius: 12px;">${element.innerHTML}</div>
+            <div class="signature-line" style="margin-top:30px; display:flex; justify-content:space-between;">
+                <div><hr style="width:200px;"><p style="font-size:10px;">Authorized Signature</p></div>
+                <div><hr style="width:200px;"><p style="font-size:10px;">Date: ${new Date().toLocaleDateString()}</p></div>
+            </div>
+            <div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8;">
+                BizHR v2.0 - Powered by BizCore | "Your Vision, Our Software"
+            </div>
+        `;
+        let opt = { margin: 0.5, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } };
+        html2pdf().set(opt).from(wrapper).save();
+    }
+    
+    function generateAttendancePDF(deptFilter=null) {
+        let empList = deptFilter ? employees.filter(e=>e.dept===deptFilter && e.isActive!==false) : employees.filter(e=>e.isActive!==false);
+        let today = getTodayStr();
+        let tableHtml = '<table style="width:100%; border-collapse:collapse; border:1px solid #ddd;"><thead><tr style="background:#f4a261; color:white;"><th>ID</th><th>Name</th><th>Department</th><th>Post</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead><tbody>';
+        empList.forEach(emp => {
+            let record = attendanceLog.find(a=>a.empId===emp.id && a.date===today);
+            let status = record && record.status==='present' ? 'Present ✓' : 'Absent ✗';
+            let checkIn = record?.checkInTime || '—';
+            let checkOut = record?.checkOutTime || '—';
+            tableHtml += `<tr><td style="padding:8px; border:1px solid #ddd;">${emp.id}</td><td style="padding:8px; border:1px solid #ddd;">${emp.name}</td><td style="padding:8px; border:1px solid #ddd;">${emp.dept}</td><td style="padding:8px; border:1px solid #ddd;">${emp.post}</td><td style="padding:8px; border:1px solid #ddd;">${checkIn}</td><td style="padding:8px; border:1px solid #ddd;">${checkOut}</td><td style="padding:8px; border:1px solid #ddd;">${status}</td></tr>`;
+        });
+        tableHtml += '</tbody></table>';
+        let logoHtml = company.logo ? `<img src="${company.logo}" style="height:50px;">` : '';
+        let wrapper = document.createElement('div');
+        wrapper.innerHTML = `<div style="text-align:center;">${logoHtml}<h2 style="color:#1a4a6f;">${company.name}</h2><h3>Attendance Report - ${deptFilter || 'All Departments'}</h3><p>Date: ${today}</p></div>${tableHtml}<div style="margin-top:30px; display:flex; justify-content:space-between;"><div><hr style="width:200px;"><p style="font-size:10px;">Authorized Signature</p></div><div><hr style="width:200px;"><p style="font-size:10px;">Date: ${new Date().toLocaleDateString()}</p></div></div><div style="text-align:center; margin-top:20px; font-size:10px;">BizHR v2.0 - Powered by BizCore</div>`;
+        html2pdf().set({ margin: 0.5, filename: `attendance_${deptFilter || 'all'}_${today}.pdf`, jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(wrapper).save();
+    }
+    
+    function generateEmployeeProfilePDF(emp) {
+        let monthAtt = attendanceLog.filter(a=>a.empId===emp.id && a.date.startsWith(getCurrentMonth()) && a.status==='present').length;
+        let shiftData = shifts.find(s=>s.empId===emp.id) || { shift: 'Not Assigned', overtime: 0 };
+        let ledger = salaryLedger.find(l=>l.empId===emp.id) || { advance: 0, paid: 0, overtimeAmount: 0 };
+        let balance = emp.salary + (ledger.overtimeAmount || 0) - ledger.advance - ledger.paid;
+        let logoHtml = company.logo ? `<img src="${company.logo}" style="height:50px;">` : '';
+        let html = `<div style="text-align:center;">${logoHtml}<h2 style="color:#1a4a6f;">${company.name}</h2><h3>Employee Profile</h3><hr></div>
+            <div style="display:flex; gap:20px; margin-bottom:20px;"><img src="${emp.photo || 'https://via.placeholder.com/100'}" style="width:100px;border-radius:50%;"><div><h2>${emp.name}</h2><p>ID: ${emp.id} | ${emp.dept} | ${emp.post}</p></div></div>
+            <table style="width:100%; border-collapse:collapse;">${[
+                ['Phone', emp.phone], ['Bank Account', emp.bankAccount], ['Address', emp.address],
+                ['Salary', emp.salary.toLocaleString()+' BDT'], ['Shift', shiftData.shift],
+                ['Overtime Hours', shiftData.overtime+' hrs'], ['Overtime Amount', (ledger.overtimeAmount||0).toLocaleString()+' BDT'],
+                ['Advance', ledger.advance.toLocaleString()+' BDT'], ['Paid', ledger.paid.toLocaleString()+' BDT'],
+                ['Balance', balance.toLocaleString()+' BDT'], ['Attendance (Month)', monthAtt+' days']
+            ].map(([k,v])=>`<tr><td style="padding:8px; border:1px solid #ddd;"><strong>${k}</strong></td><td style="padding:8px; border:1px solid #ddd;">${v||'N/A'}</td></tr>`).join('')}</table>
+            <div style="margin-top:30px; display:flex; justify-content:space-between;"><div><hr style="width:200px;"><p style="font-size:10px;">Authorized Signature</p></div><div><hr style="width:200px;"><p style="font-size:10px;">Date: ${new Date().toLocaleDateString()}</p></div></div>
+            <div style="text-align:center; margin-top:20px; font-size:10px;">BizHR v2.0 - Powered by BizCore | "Your Vision, Our Software"</div>`;
+        html2pdf().set({ margin: 0.5, filename: `${emp.name}_profile.pdf`, jsPDF: { unit: 'in', format: 'a4' } }).from(html).save();
+    }
+    
+    // Sync function for cloud
+    async function syncToCloud() {
+        showToast("Cloud sync ready. Configure API base URL in API_CONFIG.");
+        // This function will be implemented when backend is ready
+        // It will send all local data to backend API
+    }
+    
+    // Navigation
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active-page'));
+        if(document.getElementById(pageId+"Page")) document.getElementById(pageId+"Page").classList.add('active-page');
+        document.querySelectorAll('.sidebar li').forEach(li=>li.classList.remove('active'));
+        if(pageId==='dashboard') renderDashboard();
+        if(pageId==='employeeDirectory') renderEmployeeDirectory();
+        if(pageId==='departments') { renderDeptList(); renderDeptOptions(); }
+        if(pageId==='companyProfile') loadCompanyProfile();
+        if(pageId==='attendance') { renderDeptOptions(); renderAttendanceUI(); }
+        if(pageId==='leaveRequest') { renderDeptOptions(); renderLeaveRequests(); }
+        if(pageId==='terminatedEmployees') { renderDeptOptions(); renderTerminatedList(); }
+        if(pageId==='expense') { renderDeptOptions(); renderExpenses(); }
+        if(pageId==='ledger') renderLedger();
+        if(pageId==='shift') { renderDeptOptions(); renderShiftList(); }
+        if(pageId==='notice') renderNotices();
+        document.getElementById("pageTitle").innerHTML = pageId.replace(/([A-Z])/g, ' $1').trim();
+    }
+    
+    // Event Listeners
+    document.querySelectorAll('.sidebar li').forEach(li=>{
+        li.addEventListener('click',()=>{
+            let page = li.dataset.page;
+            if(page === 'logoutBtn') { 
+                Auth.logout();
+                document.getElementById("loginOverlay").style.display = "flex"; 
+                document.getElementById("app").style.display = "none"; 
+            } else showPage(page);
+        });
+    });
+    
+    document.getElementById("doLogin").onclick = ()=>{
+        let u = document.getElementById("loginUser").value;
+        let p = document.getElementById("loginPass").value;
+        if(Auth.login(u, p)) { 
+            document.getElementById("loginOverlay").style.display = "none"; 
+            document.getElementById("app").style.display = "block"; 
+            document.getElementById("userName").innerText = Auth.getUser()?.name || 'Admin';
+            document.getElementById("userRole").innerText = Auth.getUser()?.role || 'Administrator';
+            loadData(); 
+            renderDeptOptions(); 
+            renderDashboard(); 
+            renderEmployeeDirectory(); 
+            renderLedger(); 
+            renderShiftList(); 
+            renderNotices(); 
+            renderLeaveRequests(); 
+            renderTerminatedList(); 
+            renderExpenses(); 
+            showPage('dashboard'); 
+        } else {
+            document.getElementById("loginError").innerText = "Invalid username or password";
+        }
+    };
+    
+    document.getElementById("addDeptBtn")?.addEventListener('click',()=>{ let nd = document.getElementById("newDeptName").value.trim(); if(nd && !departments.includes(nd)) { departments.push(nd); saveAll(); renderDeptList(); renderDeptOptions(); showToast("Dept added"); } });
+    document.getElementById("createEmployeeBtn")?.addEventListener('click',addEmployee);
+    document.getElementById("saveAttendanceBtn")?.addEventListener('click',saveAttendance);
+    document.getElementById("attDeptSelect")?.addEventListener('change',renderAttendanceUI);
+    document.getElementById("dirDeptFilter")?.addEventListener('change',()=>renderEmployeeDirectory());
+    document.getElementById("dirSearch")?.addEventListener('keyup',()=>renderEmployeeDirectory());
+    document.getElementById("saveCompanyProfileBtn")?.addEventListener('click',saveCompanyProfile);
+    document.getElementById("submitLeaveBtn")?.addEventListener('click',submitLeaveRequest);
+    document.getElementById("terminateEmployeeBtn")?.addEventListener('click',terminateEmployee);
+    document.getElementById("addExpenseBtn")?.addEventListener('click',addExpense);
+    document.getElementById("saveShiftBtn")?.addEventListener('click',()=>{
+        let empId = parseInt(document.getElementById("shiftEmployee").value);
+        let shift = document.getElementById("shiftType").value;
+        let ot = parseInt(document.getElementById("overtimeHours").value) || 0;
+        if(!empId) { alert("Select employee"); return; }
+        let idx = shifts.findIndex(s=>s.empId===empId);
+        if(idx>=0) { shifts[idx].shift = shift; shifts[idx].overtime = ot; }
+        else shifts.push({ empId, shift, overtime: ot });
+        saveAll(); renderShiftList(); renderLedger(); showToast("Shift & Overtime saved");
+    });
+    document.getElementById("addNoticeBtn")?.addEventListener('click',()=>{
+        let title = document.getElementById("noticeTitle").value;
+        let desc = document.getElementById("noticeDesc").value;
+        if(!title) { alert("Enter title"); return; }
+        notices.push({ title, desc, date: new Date().toLocaleString() });
+        saveAll(); renderNotices(); showToast("Notice published");
+        document.getElementById("noticeTitle").value=""; document.getElementById("noticeDesc").value="";
+    });
+    document.getElementById("syncNowBtn")?.addEventListener('click',syncToCloud);
+    document.getElementById("downloadDashboardPDF")?.addEventListener('click',()=>generateProfessionalPDF('dashboardPage', 'dashboard_report.pdf', 'Dashboard Report'));
+    document.getElementById("downloadAttendanceSheetPDF")?.addEventListener('click',()=>generateAttendancePDF());
+    document.getElementById("downloadDeptWiseAttendancePDF")?.addEventListener('click',()=>{ let d = document.getElementById("deptWiseReportSelect").value; if(d) generateAttendancePDF(d); else alert("Select department"); });
+    document.getElementById("downloadLedgerPDF")?.addEventListener('click',()=>generateProfessionalPDF('ledgerPage', 'salary_ledger.pdf', 'Salary Ledger Report'));
+    document.getElementById("downloadExpensePDF")?.addEventListener('click',()=>generateProfessionalPDF('expensePage', 'expense_report.pdf', 'Expense Report'));
+    document.getElementById("downloadTerminatedPDF")?.addEventListener('click',()=>generateProfessionalPDF('terminatedEmployeesPage', 'terminated_report.pdf', 'Terminated Employees Report'));
+    document.getElementById("downloadDashboardExcel")?.addEventListener('click',()=>{ let ws = XLSX.utils.json_to_sheet(employees); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Employees"); XLSX.writeFile(wb, "employees.xlsx"); });
+    document.getElementById("themeToggle")?.addEventListener('click',()=>{ document.body.classList.toggle('dark'); });
+    
+    // Check if already logged in
+    if(Auth.isLoggedIn()) {
+        document.getElementById("loginOverlay").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        document.getElementById("userName").innerText = Auth.getUser()?.name || 'Admin';
+        document.getElementById("userRole").innerText = Auth.getUser()?.role || 'Administrator';
+        loadData();
+        renderDeptOptions();
+        renderDashboard();
+        renderEmployeeDirectory();
+        renderLedger();
+        renderShiftList();
+        renderNotices();
+        renderLeaveRequests();
+        renderTerminatedList();
+        renderExpenses();
+        showPage('dashboard');
+    }
+</script>
+</body>
+</html>
